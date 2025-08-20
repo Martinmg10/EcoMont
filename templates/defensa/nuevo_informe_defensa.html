@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Informe - Defensa Civil</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(197, 48, 48, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo i {
+            color: #c53030;
+            font-size: 1.2rem;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .form-container {
+            max-w-2xl;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .form-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .form-header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .form-content {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: #c53030;
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #c53030;
+            box-shadow: 0 0 0 3px rgba(197, 48, 48, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            border-color: #cbd5e0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #c53030, #a02626);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Preview Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal.show {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+          background: white;
+          margin: 2% auto;
+          padding: 0;
+          border-radius: 16px;
+          width: 90%;
+          max-width: 600px;
+          max-height: 90vh;
+          box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+          animation: slideIn 0.3s ease-out;
+          display: flex;
+          flex-direction: column;
+      }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto; 
+            flex: 1;
+        }
+
+        .preview-item {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .preview-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .preview-label {
+            font-weight: 600;
+            color: #c53030;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .preview-value {
+            color: #4a5568;
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            background: #f7fafc;
+            border-radius: 0 0 16px 16px;
+            flex-shrink: 0;
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            color: #22543d;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .success-message i {
+            color: #38a169;
+            margin-right: 0.5rem;
+        }
+
+        /* Character Counter */
+        .char-counter {
+            font-size: 0.875rem;
+            color: #718096;
+            text-align: right;
+            margin-top: 0.25rem;
+        }
+
+        .char-counter.warning {
+            color: #d69e2e;
+        }
+
+        .char-counter.error {
+            color: #e53e3e;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-content {
+                padding: 1.5rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                width: 95%;
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <div class="logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span> Defensa Civil</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('alertas_urgentes') }}" class="nav-link">
+                    <i class="fas fa-arrow-left"></i> Alertas Urgentes
+                </a>
+                <a href="{{ url_for('dashboard_defensa') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                
+                <button class="quick-action-btn" onclick="toggleHelp()" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>
+                        <i class="fas fa-file-alt"></i>
+                        Nuevo Informe de Emergencia
+                    </h2>
+                    <p>Complete los datos del informe de intervención</p>
+                </div>
+
+                <div class="form-content">
+                    <div id="successMessage" class="success-message">
+                        <i class="fas fa-check-circle"></i>
+                        <strong>Informe guardado exitosamente</strong>
+                        <p>El informe ha sido registrado en el sistema y notificado a los supervisores.</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('nuevo_informe_defensa') }}">
+                        <div class="form-group">
+                            <label for="titulo" class="form-label">
+                                <i class="fas fa-heading"></i> Título del Informe
+                            </label>
+                            <input 
+                                type="text" 
+                                id="titulo" 
+                                name="titulo" 
+                                class="form-input" 
+                                placeholder="Ej: Incendio en zona rural - Ruta 38"
+                                required
+                                maxlength="100"
+                                oninput="updateCharCounter('titulo', 100)"
+                            >
+                            <div id="tituloCounter" class="char-counter">0/100 caracteres</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descripcion" class="form-label">
+                                <i class="fas fa-align-left"></i> Descripción Detallada
+                            </label>
+                            <textarea 
+                                id="descripcion" 
+                                name="descripcion" 
+                                class="form-input form-textarea" 
+                                placeholder="Describí la situación de emergencia, acciones realizadas, recursos utilizados y estado actual..."
+                                required
+                                maxlength="500"
+                                oninput="updateCharCounter('descripcion', 500)"
+                            ></textarea>
+                            <div id="descripcionCounter" class="char-counter">0/500 caracteres</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ubicacion" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i> Ubicación Exacta
+                            </label>
+                            <input 
+                                type="text" 
+                                id="ubicacion" 
+                                name="ubicacion" 
+                                class="form-input" 
+                                placeholder="Ej: Ruta 38, km 12, Monteros, Tucumán"
+                                required
+                                maxlength="150"
+                                oninput="updateCharCounter('ubicacion', 150)"
+                            >
+                            <div id="ubicacionCounter" class="char-counter">0/150 caracteres</div>
+                        </div>
+
+                        <!-- Tipo de Emergencia y Prioridad -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="tipoEmergencia" class="form-label">
+                                    <i class="fas fa-exclamation-triangle"></i> Tipo de Emergencia
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="tipoEmergencia" 
+                                    name="tipoEmergencia" 
+                                    class="form-input" 
+                                    placeholder="Ej: Incendio forestal, Accidente de tránsito, Inundación..."
+                                    required
+                                    maxlength="80"
+                                    oninput="updateCharCounter('tipoEmergencia', 80)"
+                                >
+                                <div id="tipoEmergenciaCounter" class="char-counter">0/80 caracteres</div>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="prioridad" class="form-label">
+                                    <i class="fas fa-flag"></i> Nivel de Prioridad
+                                </label>
+                                <select id="prioridad" name="prioridad" class="form-input" required>
+                                    <option value="">Seleccionar prioridad...</option>
+                                    <option value="alta">🟠 Alta</option>
+                                    <option value="critica">🔴 Crítica</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Fecha/Hora del Incidente y Personal Responsable -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="fechaIncidente" class="form-label">
+                                    <i class="fas fa-calendar-alt"></i> Fecha y Hora del Incidente
+                                </label>
+                                <input 
+                                    type="datetime-local" 
+                                    id="fechaIncidente" 
+                                    name="fechaIncidente" 
+                                    class="form-input" 
+                                    required
+                                >
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="responsable" class="form-label">
+                                    <i class="fas fa-user"></i> Responsable del Informe
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="responsable" 
+                                    name="responsable" 
+                                    class="form-input" 
+                                    placeholder="Nombre responsable"
+                                    required
+                                    maxlength="80"
+                                    oninput="updateCharCounter('responsable', 80)"
+                                >
+                                <div id="responsableCounter" class="char-counter">0/80 caracteres</div>
+                            </div>
+                        </div>
+
+                        <!-- Estado del Incidente y Víctimas -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="estadoIncidente" class="form-label">
+                                    <i class="fas fa-check-circle"></i> Estado del Incidente
+                                </label>
+                                <select id="estadoIncidente" name="estadoIncidente" class="form-input" required>
+                                    <option value="">Seleccionar estado...</option>
+                                    <option value="controlado">✅ Controlado</option>
+                                    <option value="en_curso">⏳ En Curso</option>
+                                    <option value="pendiente">⚠️ Pendiente</option>
+                                    <option value="requiere_seguimiento">🔄 Requiere Seguimiento</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="victimas" class="form-label">
+                                    <i class="fas fa-users"></i> Víctimas/Afectados
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="victimas" 
+                                    name="victimas" 
+                                    class="form-input" 
+                                    placeholder="Ej: 2 heridos leves, 1 evacuado"
+                                    maxlength="100"
+                                    oninput="updateCharCounter('victimas', 100)"
+                                >
+                                <div id="victimasCounter" class="char-counter">0/100 caracteres</div>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones Adicionales -->
+                        <div class="form-group">
+                            <label for="observaciones" class="form-label">
+                                <i class="fas fa-comment"></i> Observaciones y Recomendaciones
+                            </label>
+                            <textarea 
+                                id="observaciones" 
+                                name="observaciones" 
+                                class="form-input form-textarea" 
+                                placeholder="Medidas preventivas sugeridas, seguimiento necesario, coordinación con otras instituciones..."
+                                style="min-height: 100px;"
+                                maxlength="400"
+                                oninput="updateCharCounter('observaciones', 400)"
+                            ></textarea>
+                            <div id="observacionesCounter" class="char-counter">0/400 caracteres</div>
+                        </div>
+
+                        <!-- 🔁 ACCIONES -->
+                         <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                                <i class="fas fa-times"></i> Limpiar
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="previewReport()">
+                                <i class="fas fa-eye"></i> Vista Previa
+                            </button>
+                            
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Preview Modal -->
+    <div id="previewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-eye"></i>
+                    Vista Previa del Informe
+                </h3>
+                <button class="close-btn" onclick="closePreview()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-item">
+                    <span class="preview-label">Título:</span>
+                    <div id="previewTitulo" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Descripción:</span>
+                    <div id="previewDescripcion" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Ubicación:</span>
+                    <div id="previewUbicacion" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Tipo de Emergencia:</span>
+                    <div id="previewTipoEmergencia" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Prioridad:</span>
+                    <div id="previewPrioridad" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Fecha del Incidente:</span>
+                    <div id="previewFechaIncidente" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Responsable:</span>
+                    <div id="previewResponsable" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Estado:</span>
+                    <div id="previewEstadoIncidente" class="preview-value"></div>
+                </div>
+                <div class="preview-item" id="previewVictimasItem">
+                    <span class="preview-label">Víctimas/Afectados:</span>
+                    <div id="previewVictimas" class="preview-value"></div>
+                </div>
+                <div class="preview-item" id="previewObservacionesItem">
+                    <span class="preview-label">Observaciones:</span>
+                    <div id="previewObservaciones" class="preview-value"></div>
+                </div>
+                <div class="preview-item">
+                    <span class="preview-label">Fecha de Creación:</span>
+                    <div id="previewFecha" class="preview-value"></div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-secondary" onclick="editReport()">
+                    <i class="fas fa-edit"></i> Editar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="submitForm()">
+                    <i class="fas fa-save"></i> Confirmar y Guardar
+                </button>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables para el manejo del formulario
+        let formData = {};
+
+        // Función para actualizar contadores de caracteres
+        function updateCharCounter(fieldId, maxLength) {
+            const field = document.getElementById(fieldId);
+            const counter = document.getElementById(fieldId + 'Counter');
+            const currentLength = field.value.length;
+            
+            counter.textContent = `${currentLength}/${maxLength} caracteres`;
+            
+            if (currentLength > maxLength * 0.9) {
+                counter.classList.add('warning');
+            } else {
+                counter.classList.remove('warning');
+            }
+            
+            if (currentLength >= maxLength) {
+                counter.classList.add('error');
+            } else {
+                counter.classList.remove('error');
+            }
+        }
+
+        // Función para limpiar el formulario
+        function clearForm() {
+            if (confirm('¿Estás seguro que deseas limpiar todos los campos?')) {
+                document.getElementById('informeForm').reset();
+                
+                // Restablecer fecha actual
+                const now = new Date();
+                now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+                document.getElementById('fechaIncidente').value = now.toISOString().slice(0,16);
+                
+                // Actualizar todos los contadores
+                updateCharCounter('titulo', 100);
+                updateCharCounter('descripcion', 500);
+                updateCharCounter('ubicacion', 150);
+                updateCharCounter('responsable', 80);
+                updateCharCounter('victimas', 100);
+                updateCharCounter('tipoEmergencia', 80);
+                updateCharCounter('observaciones', 400);
+                
+                hideSuccessMessage();
+            }
+        }
+
+        // Función para mostrar vista previa (CORREGIDA)
+        function previewReport() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const ubicacion = document.getElementById('ubicacion').value.trim();
+            const tipoEmergencia = document.getElementById('tipoEmergencia').value.trim();
+            const prioridad = document.getElementById('prioridad').value;
+            const fechaIncidente = document.getElementById('fechaIncidente').value;
+            const responsable = document.getElementById('responsable').value.trim();
+            const estadoIncidente = document.getElementById('estadoIncidente').value;
+
+            // Validación de campos obligatorios
+            if (!titulo || !descripcion || !ubicacion || !tipoEmergencia || !prioridad || !fechaIncidente || !responsable || !estadoIncidente) {
+                alert('Por favor, complete todos los campos obligatorios antes de continuar.');
+                return;
+            }
+
+            // Obtener campos opcionales
+            const victimas = document.getElementById('victimas').value.trim();
+            const observaciones = document.getElementById('observaciones').value.trim();
+
+            // Guardar todos los datos
+            formData = {
+                titulo: titulo,
+                descripcion: descripcion,
+                ubicacion: ubicacion,
+                tipoEmergencia: tipoEmergencia,
+                prioridad: document.getElementById('prioridad').selectedOptions[0].text,
+                fechaIncidente: new Date(fechaIncidente).toLocaleString('es-AR'),
+                responsable: responsable,
+                estadoIncidente: document.getElementById('estadoIncidente').selectedOptions[0].text,
+                victimas: victimas,
+                observaciones: observaciones,
+                fechaCreacion: new Date().toLocaleString('es-AR', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+
+            // Mostrar TODOS los datos en vista previa
+            document.getElementById('previewTitulo').textContent = formData.titulo;
+            document.getElementById('previewDescripcion').textContent = formData.descripcion;
+            document.getElementById('previewUbicacion').textContent = formData.ubicacion;
+            document.getElementById('previewTipoEmergencia').textContent = formData.tipoEmergencia;
+            document.getElementById('previewPrioridad').textContent = formData.prioridad;
+            document.getElementById('previewFechaIncidente').textContent = formData.fechaIncidente;
+            document.getElementById('previewResponsable').textContent = formData.responsable;
+            document.getElementById('previewEstadoIncidente').textContent = formData.estadoIncidente;
+            document.getElementById('previewFecha').textContent = formData.fechaCreacion;
+
+            // Campos opcionales - mostrar u ocultar según contenido
+            if (victimas) {
+                document.getElementById('previewVictimas').textContent = victimas;
+                document.getElementById('previewVictimasItem').style.display = 'block';
+            } else {
+                document.getElementById('previewVictimasItem').style.display = 'none';
+            }
+
+            if (observaciones) {
+                document.getElementById('previewObservaciones').textContent = observaciones;
+                document.getElementById('previewObservacionesItem').style.display = 'block';
+            } else {
+                document.getElementById('previewObservacionesItem').style.display = 'none';
+            }
+
+            // Mostrar modal
+            document.getElementById('previewModal').classList.add('show');
+        }
+
+        
+        // Función para cerrar vista previa
+        function closePreview() {
+            document.getElementById('previewModal').classList.remove('show');
+        }
+
+        // Función para editar desde vista previa
+        function editReport() {
+            closePreview();
+        }
+
+        // Función para confirmar y guardar
+       /* function confirmSave() {
+        if (confirm('¿Confirma que desea guardar este informe?')) {
+            // Simular guardado (o hacer un envío real si usás AJAX)
+            setTimeout(() => {
+                showSuccessMessage();
+                closePreview();
+
+                // Redirigir automáticamente al historial después de 2 segundos
+                setTimeout(() => {
+                   window.location.href = "/historial_defensa";
+                }, 2000);
+            }, 500);
+        }
+    }
+*/
+
+        // Función para mostrar mensaje de éxito
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.add('show');
+            setTimeout(() => {
+                hideSuccessMessage();
+            }, 5000);
+        }
+
+        // Función para ocultar mensaje de éxito
+        function hideSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.classList.remove('show');
+        }
+
+        // Función para volver al panel principal
+        function goBack() {
+            window.location.href = "/historial_defensa";
+        }
+
+
+        // Función para mostrar/ocultar ayuda
+        function toggleHelp() {
+            alert('Ayuda:\n\n• Complete todos los campos obligatorios\n• Use "Vista Previa" para revisar antes de guardar\n• Los contadores muestran caracteres disponibles\n• Guarde regularmente su trabajo');
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('previewModal');
+            if (event.target === modal) {
+                closePreview();
+            }
+        }
+
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closePreview();
+            }
+        });
+
+        // Inicialización cuando se carga la página
+        document.addEventListener('DOMContentLoaded', function() {
+            // Establecer fecha y hora actual por defecto
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('fechaIncidente').value = now.toISOString().slice(0,16);
+            
+            // Inicializar contadores
+            updateCharCounter('titulo', 100);
+            updateCharCounter('descripcion', 500);
+            updateCharCounter('ubicacion', 150);
+            updateCharCounter('responsable', 80);
+            updateCharCounter('victimas', 100);
+            updateCharCounter('tipoEmergencia', 80);
+            updateCharCounter('observaciones', 400);
+            
+            // Enfocar primer campo
+            document.getElementById('titulo').focus();
+        });
+
+        function submitForm() {
+            document.querySelector('form').submit();
+        }
+    </script>
+</body>
+</html>

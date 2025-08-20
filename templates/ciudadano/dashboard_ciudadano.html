@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel del Ciudadano - EcoMont</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header con navegación -->
+  
+<header class="header">
+    <div class="container">
+        <div class="nav-brand">
+            <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+            
+        </div>
+        <nav class="nav-menu">
+            <a href="{{ url_for('inicio') }}" class="nav-link">
+                <i class="fas fa-home"></i> Inicio
+            </a>
+            <!-- IA Assistant Button -->
+             <div class="ia-container" id="ia-section">
+         <a href="{{ url_for('nuevo_reporte') }}#ia-section" class="nav-link ai-button" title="Asistente IA"></a>
+                <i class="fas fa-robot"></i>
+                <span class="ai-badge">IA</span>
+            </a>
+            </div>
+            <!-- Hamburger Menu -->
+            <div class="hamburger-menu">
+                <button class="hamburger-btn" id="hamburgerBtn">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="user-details">
+                            <span class="user-name">Ciudadano</span>
+                            <span class="user-role">Usuario Registrado</span>
+                        </div>
+                    </div>
+                    <div class="menu-divider"></div>
+                    <a href="{{ url_for('ver_reportes') }}" class="menu-item">
+                        <i class="fas fa-list-alt"></i>
+                        <span>Mis Reportes</span>
+                        <small>Ver todos tus reportes</small>
+                    </a>
+                   <a href="#" class="menu-item" onclick="estadisticasIA()">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Estadísticas IA</span>
+                        <small>Análisis inteligente</small>
+                     </a>
+                    <a href="#" class="menu-item" onclick="cambiarPerfil()">
+                        <i class="fas fa-user-edit"></i>
+                        <span>Cambiar Perfil</span>
+                        <small>Editar información</small>
+                    </a>
+                    <a href="#" class="menu-item" onclick="configuracion()">
+                        <i class="fas fa-cog"></i>
+                        <span>Configuración</span>
+                        <small>Ajustes de cuenta</small>
+                    </a>
+                    <div class="menu-divider"></div>
+                    <a href="#" class="menu-item danger" onclick="confirmarSalida()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Cerrar Sesión</span>
+                        <small>Salir de la cuenta</small>
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<!-- AGREGAR ESTOS ESTILOS AL FINAL DEL <head> -->
+<style>
+/* Estilos para el menú hamburguesa */
+.hamburger-menu {
+    position: relative;
+    display: inline-block;
+}
+
+.hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.hamburger-btn:hover {
+    background: rgba(52, 152, 219, 0.1);
+}
+
+.hamburger-btn span {
+    width: 24px;
+    height: 3px;
+    background: #3498db;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-btn.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger-btn.active span:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger-btn.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* AI Button styles */
+.ai-button {
+    position: relative;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    border-radius: 25px;
+    padding: 8px 15px !important;
+    margin-right: 10px;
+    animation: aiPulse 2s infinite;
+}
+
+.ai-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.ai-badge {
+    font-size: 10px;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+@keyframes aiPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.7); }
+    50% { box-shadow: 0 0 0 10px rgba(102, 126, 234, 0); }
+}
+
+/* Dropdown menu styles */
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    min-width: 280px;
+    padding: 0;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+    border: 1px solid #e1e8ed;
+}
+
+.dropdown-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-info {
+    padding: 20px;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.user-avatar i {
+    font-size: 32px;
+    opacity: 0.9;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.user-role {
+    font-size: 12px;
+    opacity: 0.8;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #e1e8ed;
+    margin: 8px 0;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: #2c3e50;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    gap: 12px;
+}
+
+.menu-item:hover {
+    background: #f8f9fa;
+    color: #3498db;
+}
+
+.menu-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 16px;
+}
+
+.menu-item span {
+    font-weight: 500;
+}
+
+.menu-item small {
+    color: #7f8c8d;
+    font-size: 11px;
+    margin-left: auto;
+}
+
+.menu-item.danger {
+    color: #e74c3c;
+}
+
+.menu-item.danger:hover {
+    background: #fdf2f2;
+    color: #c0392b;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-menu {
+        gap: 10px;
+    }
+    
+    .dropdown-menu {
+        min-width: 250px;
+        right: -10px;
+    }
+}
+</style>
+
+<!-- AGREGAR ESTE SCRIPT AL FINAL DEL <body> -->
+<script>
+// Funcionalidad del menú hamburguesa
+document.addEventListener('DOMContentLoaded', function() {
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    
+    hamburgerBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        hamburgerBtn.classList.toggle('active');
+        dropdownMenu.classList.toggle('show');
+    });
+    
+    // Cerrar menú al hacer clic fuera
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.hamburger-menu')) {
+            hamburgerBtn.classList.remove('active');
+            dropdownMenu.classList.remove('show');
+        }
+    });
+});
+
+function confirmarSalida() {
+    if (confirm('¿Estás seguro que querés cerrar sesión?')) {
+        window.location.href = "{{ url_for('inicio') }}";
+    }
+}
+
+
+
+function estadisticasIA() {
+    alert('Función de estadísticas IA en desarrollo');
+    // Aquí puedes agregar la lógica para estadísticas IA cuando esté lista
+}
+// Funciones del menú
+function cambiarPerfil() {
+    alert('Función de cambiar perfil en desarrollo');
+    // Aquí puedes agregar la lógica para cambiar perfil
+}
+
+function configuracion() {
+    alert('Configuración en desarrollo');
+    // Aquí puedes agregar la lógica de configuración
+}
+
+function confirmarSalida() {
+    if (confirm('¿Estás seguro que querés cerrar sesión?')) {
+        window.location.href = "{{ url_for('inicio') }}";
+    }
+}
+</script>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <i class="fas fa-user-circle"></i>
+                    Bienvenido, Ciudadano
+                </h1>
+                <p class="hero-subtitle">
+                    Tu voz importa para construir un ambiente más limpio y saludable. 
+                    Reportá problemas ambientales y seguí el progreso de tus reportes.
+                </p>
+                
+<!-- Hero Section - Solo la parte de estadísticas -->
+<div class="hero-stats">
+    <div class="stat-item">
+        <i class="fas fa-file-alt"></i>
+        <span class="stat-number">{{ reportes|length if reportes else 0 }}</span>
+        <span class="stat-label">Reportes Realizados</span>
+    </div>
+    <div class="stat-item">
+        <i class="fas fa-clock"></i>
+        <span class="stat-number">{{ reportes_pendientes if reportes_pendientes else 0 }}</span>
+        <span class="stat-label">Pendientes</span>
+    </div>
+    <div class="stat-item">
+        <i class="fas fa-check-circle"></i>
+        <span class="stat-number">{{ reportes_resueltos if reportes_resueltos else 0 }}</span>
+        <span class="stat-label">Resueltos</span>
+    </div>
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cards Section -->
+    <section class="cards-section">
+        <div class="container">
+            <div class="cards-grid">
+                <!-- Nuevo Reporte Card -->
+                <div class="action-card primary">
+                    <div class="card-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Nuevo Reporte</h3>
+                        <p>Reportá un problema ambiental en tu zona. Tu contribución ayuda a mejorar nuestra comunidad.</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-map-marker-alt"></i> Ubicación GPS</span>
+                            <span class="feature"><i class="fas fa-camera"></i> Fotos opcionales</span>
+                            <span class="feature"><i class="fas fa-fast-forward"></i> Proceso rápido</span>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('nuevo_reporte') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Crear Reporte
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mis Reportes Card -->
+                <div class="action-card secondary">
+                    <div class="card-icon">
+                        <i class="fas fa-list-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Mis Reportes</h3>
+                        <p>Consultá el estado de todos tus reportes. Editá, eliminá o seguí el progreso de cada uno.</p>
+                        <div class="card-features">
+                            <span class="feature"><i class="fas fa-edit"></i> Editar reportes</span>
+                            <span class="feature"><i class="fas fa-trash-alt"></i> Eliminar reportes</span>
+                            <span class="feature"><i class="fas fa-eye"></i> Seguimiento en tiempo real</span>
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('ver_reportes') }}" class="btn btn-secondary">
+                            <i class="fas fa-search"></i> Ver Reportes
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Información Card -->
+                <div class="action-card info">
+                    <div class="card-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>¿Cómo Funciona?</h3>
+                        <p>Conocé el proceso completo desde tu reporte hasta la solución del problema ambiental.</p>
+                        <div class="process-steps">
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <span class="step-text">Reportás el problema</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <span class="step-text">Municipalidad revisa</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">3</span>
+                                <span class="step-text">Se toman acciones</span>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">4</span>
+                                <span class="step-text">Problema resuelto</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions -->
+    <section class="quick-actions">
+        <div class="container">
+            <h2 class="section-title">Acciones Rápidas</h2>
+            <div class="quick-buttons">
+                <a href="{{ url_for('nuevo_reporte') }}" class="quick-btn">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Problema Urgente</span>
+                </a>
+                <a href="{{ url_for('ver_reportes') }}" class="quick-btn">
+                    <i class="fas fa-history"></i>
+                    <span>Historial</span>
+                </a>
+                <a href="#" class="quick-btn">
+                    <i class="fas fa-phone"></i>
+                    <span>Contacto</span>
+                </a>
+                <a href="#" class="quick-btn">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Ayuda</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>
+                        <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="footer-logo">
+                        EcoMont
+                    </h4>
+                    <p>Trabajando juntos por un ambiente más limpio y sustentable.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-envelope"></i> info@ecoreportes.com</p>
+                    <p><i class="fas fa-phone"></i> (381) 123-4567</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#">Términos de Uso</a>
+                    <a href="#">Política de Privacidad</a>
+                    <a href="#">FAQ</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EcoMont. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Animaciones suaves al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.action-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

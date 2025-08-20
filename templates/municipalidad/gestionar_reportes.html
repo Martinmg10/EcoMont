@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Reportes - Municipalidad</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .buttons-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 128, 255, 0.3);
+        }
+
+        .refresh-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .refresh-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .stats-summary {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .stat-number.total { 
+            color: #2196F3; 
+        }
+        
+        .stat-number.pending { 
+            color: #FFA726; 
+        }
+        
+        .stat-number.resolved { 
+            color: #8BC34A; 
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .map-container {
+            position: relative;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .leaflet-control-container {
+            z-index: 600 !important;
+        }
+
+        .leaflet-control-zoom {
+            z-index: 600 !important;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+            }
+
+            .buttons-row {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+
+            .stats-summary {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📋 Gestionar Reportes</h1>
+        <p>Administra y actualiza el estado de los reportes ciudadanos</p>
+        </p>Haz click en cada reporte para ver su informacion y actualizar su estado</p>
+    </div>
+
+    <div class="container">
+        <div class="buttons-row">
+            <button class="back-btn" onclick="goBack()">
+                <span>←</span>
+                Volver al Menu Principal
+            </button>
+            <button class="refresh-btn" onclick="refreshData()" title="Actualizar datos">
+                🔄 Actualizar
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            Cargando datos de la base de datos...
+        </div>
+        
+        <div id="error-message" class="error" style="display: none;"></div>
+
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-number total" id="totalReports">0</div>
+                <div class="stat-label">Total de Reportes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number pending" id="pendingReports">0</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number resolved" id="resolvedReports">0</div>
+                <div class="stat-label">Resueltos</div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let map;
+        let reportsData = [];
+        let markers = [];
+
+        // Función para mostrar loading
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // Función para ocultar loading
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Función para mostrar error
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            hideLoading();
+        }
+
+        // Función para cargar datos de la base de datos
+        async function loadReportsFromDatabase() {
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/reportes');
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    reportsData = data.reportes;
+                    console.log(`Cargados ${reportsData.length} reportes desde PostgreSQL`);
+                    updateDashboard();
+                    updateMap();
+                } else {
+                    throw new Error(data.error || 'Error desconocido al cargar reportes');
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar reportes:', error);
+                showError(`Error al conectar con la base de datos: ${error.message}`);
+                
+                // Mostrar datos vacíos en caso de error
+                reportsData = [];
+                updateDashboard();
+                updateMap();
+            }
+            
+            hideLoading();
+        }
+
+        // Función para actualizar el dashboard con datos reales
+        function updateDashboard() {
+            const stats = calculateStats();
+            
+            // Actualizar contadores rápidos
+            document.getElementById('totalReports').textContent = stats.total;
+            document.getElementById('pendingReports').textContent = stats.pendiente;
+            document.getElementById('resolvedReports').textContent = stats.resuelto;
+        }
+
+        // Función para calcular estadísticas
+        function calculateStats() {
+            const stats = {
+                total: reportsData.length,
+                pendiente: 0,
+                resuelto: 0
+            };
+            
+            reportsData.forEach(report => {
+                switch(report.estado.toLowerCase()) {
+                    case 'pendiente':
+                        stats.pendiente++;
+                        break;
+                    case 'resuelto':
+                        stats.resuelto++;
+                        break;
+                }
+            });
+            
+            return stats;
+        }
+
+        // Función para actualizar el mapa
+        function updateMap() {
+            // Limpiar marcadores existentes
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+            
+            // Agregar nuevos marcadores
+            reportsData.forEach(report => {
+                if (report.latitud && report.longitud) {
+                    const color = getStatusColor(report.estado);
+                    
+                    const marker = L.circleMarker([report.latitud, report.longitud], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.7,
+                        radius: 8
+                    }).addTo(map);
+
+                    const popupContent = `
+                        <div style="max-width: 250px;">
+                            <h4>${report.titulo}</h4>
+                            <p><strong>Descripción:</strong> ${report.descripcion || 'Sin descripción'}</p>
+                            <p><strong>Ubicación:</strong> ${report.ubicacion || 'Sin ubicación específica'}</p>
+                            <p><strong>Estado:</strong> <span style="color: ${color}; font-weight: bold;">${report.estado}</span></p>
+                            <p><strong>Urgencia:</strong> ${report.urgencia || 'No especificada'}</p>
+                            <p><strong>Tipo:</strong> ${report.tipo || 'General'}</p>
+                            <p><strong>Fecha:</strong> ${new Date(report.fecha).toLocaleDateString('es-ES')}</p>
+                            ${report.contacto ? `<p><strong>Contacto:</strong> ${report.contacto}</p>` : ''}
+                            ${report.imagen ? `<img src="${report.imagen}" style="max-width: 200px; height: auto; margin-top: 10px;">` : ''}
+                            <br><br>
+                            <button onclick="cambiarEstado(${report.id}, '${report.estado}')" 
+                                    style="background: #0080ff; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold; width: 100%;">
+                                Cambiar Estado
+                            </button>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                }
+            });
+            
+            // Ajustar vista del mapa si hay reportes
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Función para obtener color según estado
+        function getStatusColor(estado) {
+            switch(estado.toLowerCase()) {
+                case 'resuelto':
+                    return '#8BC34A';
+                case 'pendiente':
+                default:
+                    return '#FFA726';
+            }
+        }
+
+        // Función para cambiar estado de reporte - SOLO PENDIENTE Y RESUELTO
+        async function cambiarEstado(id, estadoActual) {
+            let siguienteEstado;
+            
+            // Solo permitir transición directa entre Pendiente y Resuelto
+            if (estadoActual.toLowerCase() === 'pendiente') {
+                siguienteEstado = 'Resuelto';
+            } else if (estadoActual.toLowerCase() === 'resuelto') {
+                siguienteEstado = 'Pendiente';
+            } else {
+                // Si el estado es desconocido, cambiar a Pendiente
+                siguienteEstado = 'Pendiente';
+            }
+            
+            const confirmacion = confirm(`¿Cambiar estado de "${estadoActual}" a "${siguienteEstado}"?`);
+            
+            if (confirmacion) {
+                try {
+                    const response = await fetch(`/api/reportes/${id}/estado`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ estado: siguienteEstado })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Estado actualizado correctamente');
+                        await loadReportsFromDatabase(); // Recargar datos
+                    } else {
+                        throw new Error('Error al actualizar estado');
+                    }
+                } catch (error) {
+                    alert('Error al actualizar el estado del reporte');
+                    console.error('Error:', error);
+                }
+            }
+        }
+
+        // Función para actualizar datos manualmente
+        async function refreshData() {
+            await loadReportsFromDatabase();
+        }
+
+        // Inicializar mapa
+        function initMap() {
+            // Coordenadas de Monteros, Tucumán
+            map = L.map('map').setView([-27.169418, -65.499723], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        function goBack() {
+            // Redirigir de vuelta al dashboard usando ruta Flask
+            window.location.href = '/dashboard_municipalidad';
+        }
+
+        // Atajos de teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                goBack();
+            }
+        });
+
+        // Inicializar todo cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            loadReportsFromDatabase();
+            
+            // Actualizar datos cada 30 segundos
+            setInterval(loadReportsFromDatabase, 30000);
+        });
+    </script>
+</body>
+</html>

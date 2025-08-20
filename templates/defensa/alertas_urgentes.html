@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas Urgentes - Defensa Civil</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(197, 48, 48, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fff, #fed7d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c53030;
+            font-weight: bold;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: dropdownFade 0.3s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .dropdown-header h4 {
+            color: #c53030;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .dropdown-header p {
+            color: #666;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            color: #c53030;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+
+        .dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item.logout i {
+            color: #dc3545;
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Quick Actions in Header */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 3rem 0;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #c53030;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        /* Alert Messages */
+        .alert-messages {
+            margin: 2rem 0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert.success {
+            background: #f0fff4;
+            color: #22543d;
+            border-left: 4px solid #38a169;
+        }
+
+        .alert.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #e53e3e;
+        }
+
+        /* Alert Cards */
+        .alerts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .alert-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #ff1744;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .alert-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff1744, #d32f2f);
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-info {
+            flex: 1;
+        }
+
+        .alert-title {
+            color: #c53030;
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .alert-title:hover {
+            color: #e53e3e;
+            text-decoration: underline;
+        }
+
+        .alert-description {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .alert-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .meta-item i {
+            color: #c53030;
+            width: 16px;
+        }
+
+        .alert-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-resolve {
+            background: linear-gradient(135deg, #38a169, #2f855a);
+            color: white;
+        }
+
+        .btn-resolve:hover {
+            background: linear-gradient(135deg, #2f855a, #276749);
+            transform: scale(1.05);
+        }
+
+        .btn-details {
+            background: linear-gradient(135deg, #3182ce, #2c5282);
+            color: white;
+        }
+
+        .btn-details:hover {
+            background: linear-gradient(135deg, #2c5282, #2a4365);
+            transform: scale(1.05);
+        }
+
+        /* No Alerts State */
+        .no-alerts {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-alerts-icon {
+            font-size: 4rem;
+            color: #38a169;
+            margin-bottom: 1.5rem;
+        }
+
+        .no-alerts h3 {
+            color: #38a169;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-alerts p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #666;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: #c53030;
+        }
+
+        .modal-title {
+            color: #c53030;
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-field {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-label {
+            display: block;
+            color: #c53030;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-value {
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .footer {
+            background: #c53030;
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            width: 24px;
+            height: 24px;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .alert-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .alert-actions {
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+
+            .header-actions {
+                gap: 0.25rem;
+            }
+            
+            .profile-btn span {
+                display: none;
+            }
+            
+            .dropdown-content {
+                min-width: 200px;
+            }
+
+            .modal-content {
+                margin: 0.5rem;
+            }
+
+            .modal-header, .modal-body {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header con navegación -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="" class="logo">
+                <span>EcoMont - Defensa Civil</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('mapa_alertas_defensa') }}" class="nav-link">
+                      <i class="fas fa-map"></i> Ver Mapa
+                  </a>
+                <a href="{{ url_for('dashboard_defensa') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                
+                <!-- Botón de Ayuda -->
+                <button class="quick-action-btn" onclick="toggleHelp()" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+                
+                <!-- Botón de Configuración -->
+                <button class="quick-action-btn" onclick="openSettings()" title="Configuración">
+                    <i class="fas fa-cog"></i>
+                </button>
+                
+                <!-- Dropdown de Perfil -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfile()">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>Personal DC</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="profileDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <h4>Personal Defensa Civil</h4>
+                            <p>Operador en servicio</p>
+                        </div>
+                        <a href="#" onclick="viewProfile()" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Ver Perfil</span>
+                        </a>
+                        <a href="#" onclick="editProfile()" class="dropdown-item">
+                            <i class="fas fa-edit"></i>
+                            <span>Editar Perfil</span>
+                        </a>
+                        <a href="#" onclick="viewSchedule()" class="dropdown-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Mi Turno</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout()" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Cerrar Sesión</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Content Section -->
+    <section class="content-section">
+        <div class="container">
+            <h1 class="page-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Alertas Urgentes
+            </h1>
+            <p class="page-subtitle">
+                Gestión y seguimiento de emergencias en curso que requieren atención inmediata
+            </p>
+
+            <!-- Mensajes de alerta -->
+            <div class="alert-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                {% endwith %}
+            </div>
+
+            <!-- Contenido de alertas -->
+            {% if reportes %}
+                <div class="alerts-container">
+                    {% for alerta in reportes %}
+                        <div class="alert-card">
+                            <div class="alert-header">
+                                <div class="alert-icon">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="alert-info">
+                                    <h3 class="alert-title"
+                                        data-reporte='{{ alerta | tojson | safe }}'
+                                        onclick="mostrarDesdeData(this)">
+                                        {{ alerta.titulo }}
+                                    </h3>
+                                    <p class="alert-description">{{ alerta.descripcion }}</p>
+                                    
+                                    <div class="alert-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                            <span>{{ alerta.ubicacion }}</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <i class="fas fa-calendar-alt"></i>
+                                            <span>{{ alerta.fecha }}</span>
+                                        </div>
+                                        {% if alerta.tipo %}
+                                        <div class="meta-item">
+                                            <i class="fas fa-tag"></i>
+                                            <span>{{ alerta.tipo }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert-actions">
+                                <button class="btn btn-details"
+                                        data-reporte='{{ alerta | tojson | safe }}'
+                                        onclick="mostrarDesdeData(this)">
+                                    <i class="fas fa-eye"></i>
+                                    Ver Detalles
+                                </button>
+                                <form method="POST" action="{{ url_for('resolver_alerta', reporte_id=alerta.id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-resolve">
+                                        <i class="fas fa-check"></i>
+                                        Marcar como resuelto
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="no-alerts">
+                    <div class="no-alerts-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>¡Excelente trabajo!</h3>
+                    <p>No hay alertas urgentes actualmente. Todas las emergencias han sido atendidas.</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Modal de Detalles -->
+    <div id="modalDetalle" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitulo"></h2>
+                <button class="modal-close" onclick="cerrarModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <span class="modal-label">Tipo de Emergencia:</span>
+                    <div class="modal-value" id="modalTipo"></div>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Ubicación:</span>
+                    <div class="modal-value" id="modalUbicacion"></div>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Fecha y Hora:</span>
+                    <div class="modal-value" id="modalFecha"></div>
+                </div>
+                <div class="modal-field">
+                    <span class="modal-label">Descripción Completa:</span>
+                    <div class="modal-value" id="modalDescripcion"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>
+                        <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="footer-logo">
+                        EcoMont - Defensa Civil
+                    </h4>
+                    <p>Protegiendo a nuestra comunidad ante emergencias ambientales y riesgos naturales.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Emergencias</h4>
+                    <p><i class="fas fa-phone"></i> Línea de Emergencia: 911</p>
+                    <p><i class="fas fa-envelope"></i> defensa@ecoreportes.com</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#">Protocolos de Emergencia</a>
+                    <a href="#">Manual de Procedimientos</a>
+                    <a href="#">Contacto Central</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EcoMont - Defensa Civil. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del dropdown de perfil
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-btn') && !event.target.closest('.profile-btn')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        // Funciones de perfil
+        function viewProfile() {
+            alert('Redirigiendo a ver perfil...');
+            window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function editProfile() {
+            alert('Redirigiendo a editar perfil...');
+            window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function viewSchedule() {
+            alert('Redirigiendo a ver turno...');
+            window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function openSettings() {
+            alert('Abriendo configuración...');
+            window.location.href = "{{ url_for('alertas_urgentes') }}";
+        }
+
+        function toggleHelp() {
+            alert('Sistema de Ayuda - Alertas Urgentes\n\n• Haz clic en el título o "Ver Detalles" para información completa\n• Usa "Marcar como resuelto" cuando la emergencia esté controlada\n• Las alertas se ordenan por prioridad y fecha\n• Para emergencias críticas, contacta inmediatamente al supervisor\n\nPara más ayuda, contacta al centro de comando.');
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                alert('Cerrando sesión...');
+                window.location.href = "{{ url_for('login_defensa') }}";
+            }
+        }
+
+        // Funciones del modal
+        function mostrarDesdeData(element) {
+            const data = JSON.parse(element.dataset.reporte);
+            mostrarDetalle(data);
+        }
+
+        function mostrarDetalle(reporte) {
+            document.getElementById('modalTitulo').textContent = reporte.titulo || '';
+            document.getElementById('modalTipo').textContent = reporte.tipo || 'No especificado';
+            document.getElementById('modalUbicacion').textContent = reporte.ubicacion || '';
+            document.getElementById('modalFecha').textContent = reporte.fecha || '';
+            document.getElementById('modalDescripcion').textContent = reporte.descripcion || '';
+            document.getElementById('modalDetalle').classList.add('show');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalDetalle').classList.remove('show');
+        }
+
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modalDetalle').addEventListener('click', function(event) {
+            if (event.target === this) {
+                cerrarModal();
+            }
+        });
+
+        // Animaciones al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.alert-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

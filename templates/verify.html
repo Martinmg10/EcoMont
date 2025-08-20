@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verificación de correo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <h2>Verificación de correo</h2>
+    <p>Te enviamos un código a tu correo. Ingrésalo abajo:</p>
+
+    {% if error %}
+    <p class="error-text">{{ error }}</p>
+    {% endif %}
+
+    <form method="POST">
+        <input type="text" name="codigo" placeholder="Código de verificación">
+        <button type="submit">Verificar</button>
+    </form>
+</body>
+</html>

@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial de Intervenciones</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(197, 48, 48, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fff, #fed7d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c53030;
+            font-weight: bold;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: dropdownFade 0.3s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .dropdown-header h4 {
+            color: #c53030;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .dropdown-header p {
+            color: #666;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            color: #c53030;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+
+        .dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item.logout i {
+            color: #dc3545;
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Quick Actions in Header */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Breadcrumb Navigation */
+        .breadcrumb-section {
+            padding: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid rgba(197, 48, 48, 0.1);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #c53030;
+        }
+
+        .breadcrumb a {
+            color: #c53030;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .breadcrumb a:hover {
+            background: rgba(197, 48, 48, 0.1);
+        }
+
+        .breadcrumb-separator {
+            color: #999;
+        }
+
+        .breadcrumb-current {
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            color: #c53030;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-subtitle {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .history-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #e53e3e;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .history-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            color: #c53030;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .card-date {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .card-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.8rem;
+            color: #666;
+        }
+
+        .info-item i {
+            color: #e53e3e;
+            width: 18px;
+        }
+
+        .card-description {
+            color: #444;
+            line-height: 1.6;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            border-left: 3px solid #e53e3e;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+
+        .empty-title {
+            font-size: 1.5rem;
+            color: #c53030;
+            margin-bottom: 1rem;
+        }
+
+        .empty-description {
+            max-width: 400px;
+            margin: 0 auto 2rem;
+            line-height: 1.6;
+        }
+
+        .empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .empty-action:hover {
+            background: linear-gradient(135deg, #c53030, #a02626);
+            transform: scale(1.05);
+        }
+
+        /* Footer */
+        .footer {
+            background: #c53030;
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            width: 24px;
+            height: 24px;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .breadcrumb {
+                flex-wrap: wrap;
+            }
+
+            .header-actions {
+                gap: 0.25rem;
+            }
+            
+            .profile-btn span {
+                display: none;
+            }
+            
+            .dropdown-content {
+                min-width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header con navegación -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+                <span>EcoMont - Defensa Civil</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('nuevo_informe_defensa') }}" class="nav-link">
+                    <i class="fas fa-file-alt"></i> Nuevo Informe
+                </a>
+                <a href="{{ url_for('dashboard_defensa') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                
+                
+                <!-- Botón de Ayuda -->
+                <button class="quick-action-btn" onclick="toggleHelp()" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+                
+                <!-- Botón de Configuración -->
+                <button class="quick-action-btn" onclick="openSettings()" title="Configuración">
+                    <i class="fas fa-cog"></i>
+                </button>
+                
+                <!-- Dropdown de Perfil -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfile()">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>Personal DC</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="profileDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <h4>Personal Defensa Civil</h4>
+                            <p>Operador en servicio</p>
+                        </div>
+                        <a href="#" onclick="viewProfile()" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Ver Perfil</span>
+                        </a>
+                        <a href="#" onclick="editProfile()" class="dropdown-item">
+                            <i class="fas fa-edit"></i>
+                            <span>Editar Perfil</span>
+                        </a>
+                        <a href="#" onclick="viewSchedule()" class="dropdown-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Mi Turno</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout()" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Cerrar Sesión</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Breadcrumb Navigation -->
+    <section class="breadcrumb-section">
+        <div class="container">
+            <nav class="breadcrumb">
+                <span class="breadcrumb-separator">•</span>
+                <span class="breadcrumb-current"> Consulta al Historial</span>
+            </nav>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <section class="main-content">
+        <div class="container">
+            <div class="page-header">
+                <h1 class="page-title">
+                    <i class="fas fa-history"></i>
+                    Historial de Intervenciones
+                </h1>
+                <p class="page-subtitle">
+                    Registro completo de todas las acciones de emergencia realizadas por Defensa Civil
+                </p>
+            </div>
+
+            {% if informes %}
+                <div class="cards-grid">
+                    {% for informe in informes %}
+                    <div class="history-card">
+                        <div class="card-header">
+                            <h3 class="card-title">{{ informe.titulo }}</h3>
+                            <div class="card-date">
+                                <i class="fas fa-calendar"></i>
+                                {{ informe.fecha }}
+                            </div>
+                        </div>
+                        
+                        <div class="card-info">
+                            <div class="info-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <strong>Ubicación:</strong> {{ informe.ubicacion }}
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-clock"></i>
+                                <strong>Fecha de Intervención:</strong> {{ informe.fecha }}
+                            </div>
+                        </div>
+                        
+                        <div class="card-description">
+                            <strong>Descripción de la Intervención:</strong><br>
+                            {{ informe.descripcion }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="empty-title">No hay informes registrados</h3>
+                    <p class="empty-description">
+                        Aún no se han registrado informes de intervención por parte de Defensa Civil. 
+                        Cuando se realicen acciones de emergencia, aparecerán listadas aquí.
+                    </p>
+                    <a href="{{ url_for('nuevo_informe_defensa') }}" class="empty-action">
+                        <i class="fas fa-plus"></i>
+                        Crear Primer Informe
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>
+                        <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="footer-logo">
+                        EcoMont - Defensa Civil
+                    </h4>
+                    <p>Protegiendo a nuestra comunidad ante emergencias ambientales y riesgos naturales.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Emergencias</h4>
+                    <p><i class="fas fa-phone"></i> Línea de Emergencia: 911</p>
+                    <p><i class="fas fa-envelope"></i> defensa@ecoreportes.com</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#">Protocolos de Emergencia</a>
+                    <a href="#">Manual de Procedimientos</a>
+                    <a href="#">Contacto Central</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EcoMont - Defensa Civil. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del dropdown de perfil
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-btn') && !event.target.closest('.profile-btn')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        // Funciones de perfil
+        function viewProfile() {
+            alert('Redirigiendo a ver perfil...');
+             window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function editProfile() {
+            alert('Redirigiendo a editar perfil...');
+             window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function viewSchedule() {
+            alert('Redirigiendo a ver turno...');
+             window.location.href = "{{ url_for('login_defensa') }}";
+        }
+
+        function openSettings() {
+            alert('Abriendo configuración...');
+             window.location.href = "{{ url_for('historial_defensa') }}";
+        }
+
+        function toggleHelp() {
+            alert('Sistema de Ayuda - Historial\n\n• Aquí puedes revisar todas las intervenciones realizadas\n• Cada tarjeta muestra detalles de la emergencia atendida\n• Usa el breadcrumb para navegar fácilmente\n• Para crear nuevos informes, ve al Dashboard principal\n\nPara más ayuda, contacta al supervisor.');
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                alert('Cerrando sesión...');
+                 window.location.href = "{{ url_for('login_defensa') }}";
+            }
+        }
+
+        // Animaciones suaves al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.history-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 150);
+            });
+        });
+    </script>
+</body>
+</html>

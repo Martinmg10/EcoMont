@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Zona Crítica Cercana{% endblock %}
+
+{% block content %}
+<section class="py-12 px-6 bg-red-50 min-h-screen">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+    <h2 class="text-2xl font-bold text-red-700 mb-4">Zona Crítica Cercana</h2>
+
+    <p class="mb-4 text-gray-700"><strong>Ubicación:</strong> {{ zona.ubicacion }}</p>
+    <p class="mb-4 text-gray-700"><strong>Problema:</strong> {{ zona.problema }}</p>
+    <p class="mb-6 text-gray-700"><strong>Recomendación:</strong> {{ zona.recomendacion }}</p>
+
+    <a href="{{ url_for('dashboard_defensa') }}" class="inline-block bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">Volver al Panel</a>
+  </div>
+</section>
+{% endblock %}

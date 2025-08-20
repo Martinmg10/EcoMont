@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Municipalidad</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1001;
+        }
+
+        .hamburger {
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .hamburger div {
+            width: 25px;
+            height: 3px;
+            background-color: white;
+            margin: 5px 0;
+            transition: 0.3s;
+        }
+
+        .title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            flex: 1;
+            text-align: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .main-container {
+            display: flex;
+            height: calc(100vh - 70px);
+            position: relative;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            position: fixed;
+            height: calc(100vh - 70px);
+            z-index: 1000;
+            top: 70px;
+            left: 0;
+        }
+
+        .sidebar.active {
+            transform: translateX(0);
+        }
+
+        .sidebar-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #333;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: #0080ff;
+            color: white;
+        }
+
+        .content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            transition: margin-left 0.3s ease;
+            width: 100%;
+        }
+
+        .content.shifted {
+            margin-left: 250px;
+        }
+
+        .map-container {
+            position: relative;
+            height: 500px;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .stats-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 300px;
+            z-index: 500;
+        }
+
+        .reports-counter {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .chart-container {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .chart-center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .chart-center-text .font-large {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2196F3;
+        }
+
+        .chart-center-text .font-small {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .resolved-color {
+            background-color: #8BC34A;
+        }
+
+        .pending-color {
+            background-color: #FFA726;
+        }
+
+        .actions-section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .actions-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .action-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 128, 255, 0.3);
+        }
+
+        .delete-button {
+            background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .delete-button:hover {
+            background: linear-gradient(135deg, #c53030 0%, #9c2a2a 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(197, 48, 48, 0.4);
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .stat-number.total { 
+            color: #2196F3; 
+        }
+        
+        .stat-number.pending { 
+            color: #FFA726; 
+        }
+        
+        .stat-number.resolved { 
+            color: #8BC34A; 
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #c62828;
+        }
+
+        .refresh-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 10px;
+        }
+
+        .refresh-btn:hover {
+            background: #45a049;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-panel {
+                position: static;
+                width: 100%;
+                margin-top: 20px;
+            }
+            
+            .content.shifted {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+            
+            .sidebar.active {
+                transform: translateX(0);
+            }
+        }
+
+        .leaflet-control-container {
+            z-index: 600 !important;
+        }
+
+        .leaflet-control-zoom {
+            z-index: 600 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="overlay"></div>
+    
+    <header class="header">
+        <div class="hamburger" onclick="toggleSidebar()">
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <h1 class="title">Municipalidad<br><span style="font-size: 14px;">(Los reportes se eliminarán automáticamente después de 14 días de haber sido marcados como resueltos)</h1>
+    </div>
+        <div class="user-info">
+            <span>Admin Municipal</span>
+            <button class="refresh-btn" onclick="refreshData()" title="Actualizar datos">🔄</button>
+            <button class="logout-btn" onclick="logout()">Salir</button>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <nav class="sidebar" id="sidebar">
+            <div class="sidebar-item active">
+                <span>⚙️ Configuración</span>
+            </div>
+        </nav>
+
+        <main class="content" id="content">
+            <div id="loading" class="loading" style="display: none;">
+                Cargando datos de la base de datos...
+            </div>
+            
+            <div id="error-message" class="error" style="display: none;"></div>
+
+            <div class="quick-stats" id="quick-stats">
+                <div class="stat-card">
+                    <div class="stat-number total" id="total-reports">0</div>
+                    <div class="stat-label">Reportes Totales</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number pending" id="pending-reports">0</div>
+                    <div class="stat-label">Pendientes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number resolved" id="resolved-reports">0</div>
+                    <div class="stat-label">Resueltos</div>
+                </div>
+            </div>
+
+            <div class="grid-container">
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="stats-panel">
+                        <div class="reports-counter" id="reports-counter">Reportes: 0</div>
+                        <div class="chart-container">
+                            <canvas id="donutChart"></canvas>
+                            <div class="chart-center-text">
+                                <div class="font-large" id="chart-total">0</div>
+                                <div class="font-small">Total</div>
+                            </div>
+                        </div>
+                        <div class="legend" id="chart-legend">
+                            <div class="legend-item">
+                                <div class="legend-color resolved-color"></div>
+                                <span id="resolved-count">Resueltos (0)</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color pending-color"></div>
+                                <span id="pending-count">Pendientes (0)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="actions-section">
+                    <h3 class="actions-title">Acciones Preventivas:</h3>
+                    <button class="action-button" onclick="navigateToEmitirMensaje()">
+                        <span>📧 Emitir Mensaje</span>
+                        <span>></span>
+                    </button>
+                    <button class="action-button" onclick="navigateToManageReports()">
+                        <span>📋 Gestión de Reportes</span>
+                        <span>></span>
+                    </button>
+                    <button class="action-button" onclick="navigateToViewReports()">
+                        <span>📊 Historial de Reportes</span>
+                        <span>></span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Variables globales
+        let map;
+        let sidebar = document.getElementById('sidebar');
+        let overlay = document.getElementById('overlay');
+        let content = document.getElementById('content');
+        let chart;
+        let reportsData = [];
+        let markers = [];
+
+        // Función para mostrar loading
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error-message').style.display = 'none';
+        }
+
+        // Función para ocultar loading
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Función para mostrar error
+        function showError(message) {
+            const errorDiv = document.getElementById('error-message');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            hideLoading();
+        }
+
+        // Función para cargar datos de la base de datos
+        async function loadReportsFromDatabase() {
+            showLoading();
+            
+            try {
+                const response = await fetch('/api/reportes');
+                
+                if (!response.ok) {
+                    throw new Error(`Error HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    reportsData = data.reportes;
+                    console.log(`Cargados ${reportsData.length} reportes desde PostgreSQL`);
+                    updateDashboard();
+                    updateMap();
+                    updateChart();
+                } else {
+                    throw new Error(data.error || 'Error desconocido al cargar reportes');
+                }
+                
+            } catch (error) {
+                console.error('Error al cargar reportes:', error);
+                showError(`Error al conectar con la base de datos: ${error.message}`);
+                
+                // Mostrar datos vacíos en caso de error
+                reportsData = [];
+                updateDashboard();
+                updateMap();
+                updateChart();
+            }
+            
+            hideLoading();
+        }
+
+        // Función para actualizar el dashboard con datos reales
+        function updateDashboard() {
+            const stats = calculateStats();
+            
+            // Actualizar contadores rápidos
+            document.getElementById('total-reports').textContent = stats.total;
+            document.getElementById('pending-reports').textContent = stats.pendiente;
+            document.getElementById('resolved-reports').textContent = stats.resuelto;
+            
+            // Actualizar contador en el panel del mapa
+            document.getElementById('reports-counter').textContent = `Reportes: ${stats.total}`;
+            document.getElementById('chart-total').textContent = stats.total;
+            
+            // Actualizar leyenda
+            document.getElementById('resolved-count').textContent = `Resueltos (${stats.resuelto})`;
+            document.getElementById('pending-count').textContent = `Pendientes (${stats.pendiente})`;
+        }
+
+        // Función para calcular estadísticas
+        function calculateStats() {
+            const stats = {
+                total: reportsData.length,
+                pendiente: 0,
+                resuelto: 0
+            };
+            
+            reportsData.forEach(report => {
+                switch(report.estado.toLowerCase()) {
+                    case 'pendiente':
+                        stats.pendiente++;
+                        break;
+                    case 'resuelto':
+                        stats.resuelto++;
+                        break;
+                }
+            });
+            
+            return stats;
+        }
+
+        // Función para actualizar el mapa
+        function updateMap() {
+            // Limpiar marcadores existentes
+            markers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            markers = [];
+            
+            // Agregar nuevos marcadores
+            reportsData.forEach(report => {
+                if (report.latitud && report.longitud) {
+                    const color = getStatusColor(report.estado);
+                    
+                    const marker = L.circleMarker([report.latitud, report.longitud], {
+                        color: color,
+                        fillColor: color,
+                        fillOpacity: 0.7,
+                        radius: 8
+                    }).addTo(map);
+
+                    const popupContent = `
+                        <div style="max-width: 250px;">
+                            <h4>${report.titulo}</h4>
+                            <p><strong>Descripción:</strong> ${report.descripcion || 'Sin descripción'}</p>
+                            <p><strong>Ubicación:</strong> ${report.ubicacion || 'Sin ubicación específica'}</p>
+                            <p><strong>Estado:</strong> <span style="color: ${color}; font-weight: bold;">${report.estado}</span></p>
+                            <p><strong>Urgencia:</strong> ${report.urgencia || 'No especificada'}</p>
+                            <p><strong>Tipo:</strong> ${report.tipo || 'General'}</p>
+                            <p><strong>Fecha:</strong> ${new Date(report.fecha).toLocaleDateString('es-ES')}</p>
+                            ${report.contacto ? `<p><strong>Contacto:</strong> ${report.contacto}</p>` : ''}
+                            ${report.imagen ? `<img src="${report.imagen}" style="max-width: 200px; height: auto; margin-top: 10px;">` : ''}
+                            <br><br>
+                        </div>
+                    `;
+
+                    marker.bindPopup(popupContent);
+                    markers.push(marker);
+                }
+            });
+            
+            // Ajustar vista del mapa si hay reportes
+            if (markers.length > 0) {
+                const group = new L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Función para obtener color según estado
+        function getStatusColor(estado) {
+            switch(estado.toLowerCase()) {
+                case 'resuelto':
+                    return '#8BC34A';
+                case 'pendiente':
+                default:
+                    return '#FFA726';
+            }
+        }
+
+        // Función para actualizar el gráfico
+        function updateChart() {
+            const stats = calculateStats();
+            
+            if (chart) {
+                chart.destroy();
+            }
+            
+            const ctx = document.getElementById('donutChart').getContext('2d');
+            chart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [stats.resuelto, stats.pendiente],
+                        backgroundColor: ['#8BC34A', '#FFA726'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    cutout: '70%'
+                }
+            });
+        }
+
+        // Función para actualizar datos manualmente
+        async function refreshData() {
+            await loadReportsFromDatabase();
+        }
+
+        // Inicializar mapa
+        function initMap() {
+            // Coordenadas de Monteros, Tucumán
+            map = L.map('map').setView([-27.169418, -65.499723], 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+        }
+
+        // Funciones de navegación y sidebar
+        function logout() {
+            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+                window.location.href = "/";
+            }
+        }
+
+        function toggleSidebar() {
+            const isActive = sidebar.classList.contains('active');
+            
+            if (isActive) {
+                closeSidebar();
+            } else {
+                openSidebar();
+            }
+        }
+
+        function openSidebar() {
+            sidebar.classList.add('active');
+            overlay.classList.add('active');
+            
+            if (window.innerWidth > 768) {
+                content.classList.add('shifted');
+                setTimeout(() => {
+                    if (map) {
+                        map.invalidateSize();
+                    }
+                }, 300);
+            }
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            content.classList.remove('shifted');
+            
+            setTimeout(() => {
+                if (map) {
+                    map.invalidateSize();
+                }
+            }, 300);
+        }
+
+        overlay.addEventListener('click', closeSidebar);
+
+        function navigateToEmitirMensaje() {
+            window.location.href = '/emitir_mensaje';
+        }
+
+        function navigateToManageReports() {
+            window.location.href = '/gestionar_reportes';
+        }
+
+        function navigateToViewReports() {
+            window.location.href = '/ver_reportesM';
+        }
+
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                closeSidebar();
+            });
+        });
+
+        window.addEventListener('resize', function() {
+            if (window.innerWidth <= 768) {
+                content.classList.remove('shifted');
+            } else if (sidebar.classList.contains('active')) {
+                content.classList.add('shifted');
+            }
+            
+            if (map) {
+                setTimeout(() => map.invalidateSize(), 100);
+            }
+        });
+
+        // Inicializar todo cuando cargue la página
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+            loadReportsFromDatabase();
+            
+            // Actualizar datos cada 30 segundos
+            setInterval(loadReportsFromDatabase, 30000);
+        });
+    </script>
+</body>
+</html>

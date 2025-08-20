@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nuevo Reporte - EcoMont</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+
+
+<style>
+        .ia-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .ia-header {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .ia-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .ia-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            border: 1px solid #e1e8ed;
+        }
+        
+        .chat-container {
+            grid-column: 1 / -1;
+            max-height: 500px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            max-height: 300px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 18px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .message.user {
+            background: #3498db;
+            color: white;
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .message.ai {
+            background: white;
+            border: 1px solid #e1e8ed;
+            color: #2c3e50;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        .chat-input:focus {
+            border-color: #3498db;
+        }
+        
+        .send-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .send-btn:hover {
+            background: #2980b9;
+            transform: scale(1.05);
+        }
+        
+        .feature-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        
+        .suggestion-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .suggestion-pill {
+            background: #ecf0f1;
+            color: #2c3e50;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-pill:hover {
+            background: #3498db;
+            color: white;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            .ia-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+                <span></span>
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('dashboard_ciudadano') }}" class="nav-link">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="ia-container">
+        <div class="ia-header">
+            <h1><i class="fas fa-robot"></i> Asistente IA de EcoMont</h1>
+            <p>Tu compañero inteligente para reportes ambientales más efectivos</p>
+        </div>
+
+        <div class="ia-grid">
+            <!-- Chat con IA -->
+            <div class="ia-card chat-container">
+                <h3><i class="fas fa-comments"></i> Chat con Asistente</h3>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message ai">
+                        <strong>🤖 Asistente IA:</strong><br>
+                        ¡Hola! Soy tu asistente inteligente. Puedo ayudarte con:
+                        <ul style="margin: 10px 0; padding-left: 20px;">
+                            <li>Cómo hacer reportes efectivos</li>
+                            <li>Clasificar tipos de problemas</li>
+                            <li>Sugerir mejoras en tus reportes</li>
+                            <li>Responder dudas sobre el proceso</li>
+                        </ul>
+                        ¿En qué te puedo ayudar?
+                    </div>
+                </div>
+                <div class="suggestion-pills">
+                    <span class="suggestion-pill" onclick="enviarSugerencia('¿Cómo hago un reporte?')">¿Cómo hago un reporte?</span>
+                    <span class="suggestion-pill" onclick="enviarSugerencia('¿Qué nivel de urgencia elegir?')">¿Qué urgencia elegir?</span>
+                    <span class="suggestion-pill" onclick="enviarSugerencia('¿Qué fotos subir?')">¿Qué fotos subir?</span>
+                    <span class="suggestion-pill" onclick="enviarSugerencia('¿Cómo seguir mi reporte?')">¿Cómo hacer seguimiento?</span>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="Escribe tu pregunta aquí..." onkeypress="handleEnter(event)">
+                    <button class="send-btn" onclick="enviarMensaje()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Clasificador Automático -->
+            <div class="ia-card">
+                <h3><i class="fas fa-brain"></i> Clasificador Inteligente</h3>
+                <p>Describe tu problema y la IA lo clasificará automáticamente</p>
+                <textarea id="textoClasificar" placeholder="Ej: Hay mucha basura acumulada en la esquina de mi casa..." style="width: 100%; height: 80px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0;"></textarea>
+                <button onclick="clasificarTexto()" style="background: #e74c3c; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%;">
+                    <i class="fas fa-magic"></i> Clasificar con IA
+                </button>
+                <div id="resultadoClasificacion" style="margin-top: 15px; display: none;">
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <h4>Resultado de la IA:</h4>
+                        <div id="clasificacionContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mejorador de Ubicación -->
+            <div class="ia-card">
+               
+            <!--  input type="text" id="ubicacionInput" placeholder="Ej: centro, cerca de la plaza..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0;"-->
+
+
+
+    <!-- Form Section -->
+    <section class="form-section">
+        <div class="container">
+            <div class="form-header">
+                <h1 class="form-title">
+                    <i class="fas fa-plus-circle"></i>
+                    Crear Nuevo Reporte
+                </h1>
+                <p class="form-subtitle">
+                    Ayudanos a mejorar nuestro ambiente reportando problemas en tu zona.
+                    Completá el formulario con la mayor información posible.
+                </p>
+            </div>
+
+            <div class="form-container">
+                <form method="POST" class="report-form" id="reportForm" enctype="multipart/form-data">
+                    
+                    <!-- Alerta de Emergencia (oculta inicialmente) -->
+                    <div class="emergency-alert" id="emergencyAlert">
+                        <h4><i class="fas fa-exclamation-triangle"></i> REPORTE DE EMERGENCIA</h4>
+                        <p>
+                            <strong>Este reporte será enviado directamente a Defensa Civil</strong> para atención inmediata.
+                            Los reportes de urgencia alta requieren respuesta prioritaria y serán tratados como emergencias ambientales.
+                            Por favor, asegurate de incluir toda la información necesaria y un teléfono de contacto.
+                        </p>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Título del Reporte -->
+                        <div class="form-group full-width">
+                            <label for="titulo" class="form-label">
+                                <i class="fas fa-heading"></i>
+                                Título del Reporte
+                            </label>
+                            <input 
+                                type="text" 
+                                id="titulo" 
+                                name="titulo" 
+                                class="form-input" 
+                                placeholder="Ej: Basura acumulada en Plaza San Martín"
+                                required
+                                maxlength="100"
+                            >
+                            <div class="input-help">
+                                <span class="char-counter" id="tituloCounter">0/100</span>
+                                <span class="help-text">Sé claro y específico en el título</span>
+                            </div>
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="form-group">
+                            <label for="ubicacion" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Ubicación
+                            </label>
+                            <input 
+                                type="text" 
+                                id="ubicacion" 
+                                name="ubicacion" 
+                                class="form-input" 
+                                placeholder="Ej: Av. Independencia 450, Centro"
+                                required
+                            >
+                            <button type="button" class="location-btn" id="getLocationBtn">
+                                <i class="fas fa-crosshairs"></i>
+                                Usar mi ubicación
+                            </button>
+                        </div>
+
+                        <!-- Tipo de Problema -->
+                        <div class="form-group">
+                            <label for="tipo" class="form-label">
+                                <i class="fas fa-tags"></i>
+                                Tipo de Problema
+                            </label>
+                            <select id="tipo" name="tipo" class="form-select" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="basura">🗑️ Basura y Residuos</option>
+                                <option value="agua">💧 Inundaciones</option>
+                                <option value="otro">❓ Otro</option>
+                            </select>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group full-width">
+                            <label for="descripcion" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Descripción Detallada
+                            </label>
+                            <textarea 
+                                id="descripcion" 
+                                name="descripcion" 
+                                class="form-textarea" 
+                                rows="6" 
+                                placeholder="Describí el problema con el mayor detalle posible. Incluí información sobre cuándo lo notaste, la gravedad del problema, y cualquier detalle que pueda ser útil para solucionarlo."
+                                required
+                                maxlength="500"
+                            ></textarea>
+                            <div class="input-help">
+                                <span class="char-counter" id="descripcionCounter">0/500</span>
+                                <span class="help-text">Incluí todos los detalles relevantes</span>
+                            </div>
+                        </div>
+
+                        <!-- Subir Fotos -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-camera"></i>
+                                Fotografías del Problema (Opcional)
+                            </label>
+                            <div class="photo-upload-section" id="photoUploadArea">
+                                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h4>Arrastrá las fotos aquí o hacé clic para seleccionar</h4>
+                                    <p>Podés subir hasta 5 fotos (JPG, PNG, máximo 5MB cada una)</p>
+                                    <div class="photo-counter" id="photoCounter">0/5 fotos seleccionadas</div>
+                                </div>
+                                <!-- Botones específicos para móviles -->
+                                <div class="mobile-photo-actions">
+                                    <button type="button" class="photo-action-btn" onclick="openCamera()">
+                                        <i class="fas fa-camera"></i>
+                                        Tomar Foto
+                                    </button>
+                                    <button type="button" class="photo-action-btn secondary" onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-folder-open"></i>
+                                        Elegir de Galería
+                                    </button>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    id="fileInput" 
+                                    name="fotos" 
+                                    multiple 
+                                    accept="image/*"
+                                    capture="environment"
+                                    style="display: none;"
+                                >
+                                <div class="photo-preview" id="photoPreview"></div>
+                            </div>
+                            <div class="input-help">
+                                <span class="help-text">Las fotos ayudan a entender mejor el problema</span>
+                            </div>
+                        </div>
+
+                        <!-- Urgencia -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Nivel de Urgencia
+                            </label>
+                            <div class="urgency-options">
+                                <label class="urgency-option low">
+                                    <input type="radio" name="urgencia" value="baja" checked>
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Baja</span>
+                                            <small>Problema que puede esperar</small>
+                                        </div>
+                                    </span>
+                                </label>
+                                <label class="urgency-option medium">
+                                    <input type="radio" name="urgencia" value="media">
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Media</span>
+                                            <small>Requiere atención pronta</small>
+                                        </div>
+                                    </span>
+                                </label>
+                                <label class="urgency-option high">
+                                    <input type="radio" name="urgencia" value="alta">
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Alta - EMERGENCIA</span>
+                                            <small>Va directo a Defensa Civil</small>
+                                        </div>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Contacto -->
+                        <div class="form-group">
+                            <label for="contacto" class="form-label">
+                                <i class="fas fa-phone"></i>
+                                Teléfono de Contacto <span id="contactoRequired" style="display: none; color: #e74c3c;">*</span>
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="contacto" 
+                                name="contacto" 
+                                class="form-input" 
+                                placeholder="Ej: (381) 123-4567"
+                            >
+                            <div class="input-help">
+                                <span class="help-text">Para seguimiento del reporte</span>
+                            </div>
+                            <div class="contact-required" id="contactAlert">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Teléfono obligatorio para reportes de emergencia</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="history.back()">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span id="submitText">Enviar Reporte</span>
+                        </button>
+                    </div>
+
+                    <!-- Form Info -->
+                    <div class="form-info">
+                        <div class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Tu información está protegida</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Respuesta en 24-48 horas</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-bell"></i>
+                            <span>Te notificaremos sobre el progreso</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i>
+                            <span><strong>Emergencias van directo a Defensa Civil</strong></span>
+                        </div>
+                    </div>
+                </form>
+
+               
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Variables globales
+        let uploadedFiles = [];
+
+        // Función para abrir cámara (específico para móviles)
+        function openCamera() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment'; // Cámara trasera por defecto
+            input.onchange = function(e) {
+                const files = Array.from(this.files);
+                handleFiles(files);
+            };
+            input.click();
+        }
+
+        // Character counters
+        function setupCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            
+            input.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                counter.textContent = `${currentLength}/${maxLength}`;
+                counter.style.color = currentLength > maxLength * 0.9 ? '#e74c3c' : '#7f8c8d';
+            });
+        }
+
+        setupCharCounter('titulo', 'tituloCounter', 100);
+        setupCharCounter('descripcion', 'descripcionCounter', 500);
+
+        // Manejo de urgencia y alerta de emergencia
+        const urgencyRadios = document.querySelectorAll('input[name="urgencia"]');
+        const emergencyAlert = document.getElementById('emergencyAlert');
+        const contactAlert = document.getElementById('contactAlert');
+        const contactRequired = document.getElementById('contactoRequired');
+        const contactInput = document.getElementById('contacto');
+
+        urgencyRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'alta') {
+                    emergencyAlert.classList.add('show');
+                    contactAlert.classList.add('show');
+                    contactRequired.style.display = 'inline';
+                    contactInput.required = true;
+                } else {
+                    emergencyAlert.classList.remove('show');
+                    contactAlert.classList.remove('show');
+                    contactRequired.style.display = 'none';
+                    contactInput.required = false;
+                }
+            });
+        });
+
+        // Manejo de archivos de foto
+        const fileInput = document.getElementById('fileInput');
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoCounter = document.getElementById('photoCounter');
+
+        // Drag and drop
+        photoUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        photoUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        photoUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(this.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            
+            if (uploadedFiles.length + imageFiles.length > 5) {
+                alert('Podés subir máximo 5 fotos');
+                return;
+            }
+
+            imageFiles.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`La foto ${file.name} es muy grande (máximo 5MB)`);
+                    return;
+                }
+
+                uploadedFiles.push(file);
+                displayPhoto(file);
+            });
+
+            updatePhotoCounter();
+        }
+
+        function displayPhoto(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoItem = document.createElement('div');
+                photoItem.classList.add('photo-item');
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="photo-remove" onclick="removePhoto(this, '${file.name}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                photoPreview.appendChild(photoItem);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto(button, fileName) {
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            button.parentElement.remove();
+            updatePhotoCounter();
+        }
+
+        function updatePhotoCounter() {
+            photoCounter.textContent = `${uploadedFiles.length}/5 fotos seleccionadas`;
+        }
+
+        // Get location functionality
+        document.getElementById('getLocationBtn').addEventListener('click', function() {
+            const btn = this;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo ubicación...';
+            btn.disabled = true;
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        document.getElementById('ubicacion').value = 
+                            `Lat: ${position.coords.latitude.toFixed(6)}, Lng: ${position.coords.longitude.toFixed(6)}`;
+                        
+                        btn.innerHTML = '<i class="fas fa-check"></i> Ubicación obtenida';
+                        btn.style.background = '#27ae60';
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            btn.style.background = '';
+                        }, 2000);
+                    },
+                    function(error) {
+                        console.error('Error getting location:', error);
+                        btn.innerHTML = '<i class="fas fa-times"></i> Error al obtener ubicación';
+                        btn.style.background = '#e74c3c';
+                        
+                        setTimeout(() => {
+                            btn.innerHTML = originalText;
+                            btn.disabled = false;
+                            btn.style.background = '';
+                        }, 2000);
+                    }
+                );
+            } else {
+                alert('La geolocalización no está soportada en este navegador.');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        });
+
+        // Form submission handling
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            
+            // Validar teléfono para urgencia alta
+            const urgenciaAlta = document.querySelector('input[name="urgencia"]:checked').value === 'alta';
+            const contacto = document.getElementById('contacto').value.trim();
+            
+            if (urgenciaAlta && !contacto) {
+                e.preventDefault();
+                alert('El teléfono de contacto es obligatorio para reportes de emergencia');
+                document.getElementById('contacto').focus();
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            if (urgenciaAlta) {
+                submitText.textContent = 'Enviando a Defensa Civil...';
+            } else {
+                submitText.textContent = 'Enviando...';
+            }
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + submitText.textContent;
+        });
+
+        // Form validation and visual feedback
+        const inputs = document.querySelectorAll('.form-input, .form-textarea, .form-select');
+        inputs.forEach(input => {
+            input.addEventListener('blur', function() {
+                if (this.required && this.value.trim() === '') {
+                    this.classList.add('error');
+                } else {
+                    this.classList.remove('error');
+                    this.classList.add('success');
+                }
+            });
+
+            input.addEventListener('focus', function() {
+                this.classList.remove('error', 'success');
+            });
+        });
+
+        // Funciones de IA que faltan
+function enviarMensaje() {
+    const input = document.getElementById('chatInput');
+    const mensaje = input.value.trim();
+    if (!mensaje) return;
+    
+    agregarMensaje('user', mensaje);
+    input.value = '';
+    
+    setTimeout(() => {
+        const respuesta = generarRespuestaIA(mensaje);
+        agregarMensaje('ai', respuesta);
+    }, 1000);
+}
+
+function agregarMensaje(tipo, texto) {
+    const chatMessages = document.getElementById('chatMessages');
+    const mensaje = document.createElement('div');
+    mensaje.className = `message ${tipo}`;
+    
+    if (tipo === 'ai') {
+        mensaje.innerHTML = `<strong>🤖 Asistente IA:</strong><br>${texto}`;
+    } else {
+        mensaje.textContent = texto;
+    }
+    
+    chatMessages.appendChild(mensaje);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function enviarSugerencia(texto) {
+    document.getElementById('chatInput').value = texto;
+    enviarMensaje();
+}
+
+function handleEnter(event) {
+    if (event.key === 'Enter') {
+        enviarMensaje();
+    }
+}
+
+function generarRespuestaIA(pregunta) {
+    const respuestas = {
+        'cómo hago un reporte': 'Para hacer un reporte efectivo: 1) Sé específico con la ubicación, 2) Describe claramente el problema, 3) Agrega fotos si es posible.',
+        'qué urgencia elegir': 'BAJA: puede esperar. MEDIA: atención pronta. ALTA: emergencias a Defensa Civil.',
+        'qué fotos subir': 'Fotos claras del problema, vista general y detalles. Máximo 5 fotos.',
+        'cómo hacer seguimiento': 'En "Mis Reportes" podés ver el estado. Te notificaremos cambios importantes.'
+    };
+    
+    const preguntaLower = pregunta.toLowerCase();
+    for (const [key, value] of Object.entries(respuestas)) {
+        if (preguntaLower.includes(key)) return value;
+    }
+    
+    return 'Puedo ayudarte con: crear reportes, elegir urgencia, subir fotos y seguimiento. ¿Qué necesitás?';
+}
+
+function clasificarTexto() {
+    const texto = document.getElementById('textoClasificar').value.trim();
+    if (!texto) {
+        alert('Describe el problema primero');
+        return;
+    }
+    
+    let tipo = 'otro';
+    if (texto.toLowerCase().includes('basura')) tipo = 'basura';
+    if (texto.toLowerCase().includes('agua')) tipo = 'agua';
+    
+    document.getElementById('clasificacionContent').innerHTML = `
+        <p><strong>Tipo sugerido:</strong> ${tipo === 'basura' ? '🗑️ Basura' : tipo === 'agua' ? '💧 Agua' : '❓ Otro'}</p>
+        <button onclick="document.getElementById('tipo').value='${tipo}'" style="background: #3498db; color: white; border: none; padding: 8px 15px; border-radius: 5px;">
+            Aplicar al formulario
+        </button>
+    `;
+    document.getElementById('resultadoClasificacion').style.display = 'block';
+}
+
+
+    </script>
+</body>
+</html>
+

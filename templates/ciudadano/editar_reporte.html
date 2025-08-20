@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Reporte - EcoMont</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+        
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+              <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+                
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('ver_reportes') }}" class="nav-link">
+                    <i class="fas fa-arrow-left"></i> Volver a Mis Reportes
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Edit Form Section -->
+    <section class="form-section">
+        <div class="container">
+            <div class="form-header">
+                <h1 class="form-title">
+                    <i class="fas fa-edit"></i>
+                    Editar Reporte
+                </h1>
+                <p class="form-subtitle">
+                    Actualizá la información de tu reporte. Los cambios se guardarán inmediatamente.
+                </p>
+            </div>
+
+            <div class="form-container">
+                <form method="POST" class="report-form" id="editForm" enctype="multipart/form-data">
+                    
+                    <!-- Alerta de Emergencia (oculta inicialmente) -->
+                    <div class="emergency-alert" id="emergencyAlert">
+                        <h4><i class="fas fa-exclamation-triangle"></i> REPORTE DE EMERGENCIA</h4>
+                        <p>
+                            <strong>Este reporte será enviado directamente a Defensa Civil</strong> para atención inmediata.
+                            Los reportes de urgencia alta requieren respuesta prioritaria y serán tratados como emergencias ambientales.
+                            Por favor, asegurate de incluir toda la información necesaria y un teléfono de contacto.
+                        </p>
+                    </div>
+
+                    <div class="form-grid">
+                        <!-- Título del Reporte -->
+                        <div class="form-group full-width">
+                            <label for="titulo" class="form-label">
+                                <i class="fas fa-heading"></i>
+                                Título del Reporte
+                            </label>
+                            <input 
+                                type="text" 
+                                id="titulo" 
+                                name="titulo" 
+                                class="form-input" 
+                                value="{{ reporte.titulo }}"
+                                required
+                                maxlength="100"
+                            >
+                            <div class="input-help">
+                                <span class="char-counter" id="tituloCounter">{{ reporte.titulo|length }}/100</span>
+                                <span class="help-text">Sé claro y específico en el título</span>
+                            </div>
+                        </div>
+
+                        <!-- Ubicación -->
+                        <div class="form-group">
+                            <label for="ubicacion" class="form-label">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Ubicación
+                            </label>
+                            <input 
+                                type="text" 
+                                id="ubicacion" 
+                                name="ubicacion" 
+                                class="form-input" 
+                                value="{{ reporte.ubicacion }}"
+                                required
+                            >
+                            <button type="button" class="location-btn" id="getLocationBtn">
+                                <i class="fas fa-crosshairs"></i>
+                                Usar mi ubicación
+                            </button>
+                        </div>
+
+                        <!-- Tipo de Problema -->
+                        <div class="form-group">
+                            <label for="tipo" class="form-label">
+                                <i class="fas fa-tags"></i>
+                                Tipo de Problema
+                            </label>
+                            <select id="tipo" name="tipo" class="form-select" required>
+                                <option value="">Seleccionar tipo</option>
+                                <option value="basura" {{ 'selected' if reporte.tipo == 'basura' else '' }}>🗑️ Basura y Residuos</option>
+                                <option value="agua" {{ 'selected' if reporte.tipo == 'agua' else '' }}>💧 Inundaciones</option>
+                                <option value="otro" {{ 'selected' if reporte.tipo == 'otro' else '' }}>❓ Otro</option>
+                            </select>
+                        </div>
+
+                        <!-- Estado del Reporte (Solo lectura) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-info-circle"></i>
+                                Estado Actual
+                            </label>
+                            <div class="status-display">
+                                <span class="status-badge status-{{ reporte.estado|lower|replace(' ', '-') }}">
+                                    {% if reporte.estado == 'Pendiente' %}
+                                        <i class="fas fa-clock"></i>
+                                    {% elif reporte.estado == 'En Proceso' %}
+                                        <i class="fas fa-cog fa-spin"></i>
+                                    {% elif reporte.estado == 'Resuelto' %}
+                                        <i class="fas fa-check-circle"></i>
+                                    {% endif %}
+                                    {{ reporte.estado }}
+                                </span>
+                                <small class="status-help">El estado es actualizado por la municipalidad</small>
+                            </div>
+                        </div>
+
+                        <!-- Descripción -->
+                        <div class="form-group full-width">
+                            <label for="descripcion" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Descripción Detallada
+                            </label>
+                            <textarea 
+                                id="descripcion" 
+                                name="descripcion" 
+                                class="form-textarea" 
+                                rows="6" 
+                                required
+                                maxlength="500"
+                                placeholder="Describí el problema con el mayor detalle posible. Incluí información sobre cuándo lo notaste, la gravedad del problema, y cualquier detalle que pueda ser útil para solucionarlo."
+                            >{{ reporte.descripcion }}</textarea>
+                            <div class="input-help">
+                                <span class="char-counter" id="descripcionCounter">{{ reporte.descripcion|length }}/500</span>
+                                <span class="help-text">Incluí todos los detalles relevantes</span>
+                            </div>
+                        </div>
+
+                        <!-- Fotos Existentes y Nuevas -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-camera"></i>
+                                Fotografías del Problema
+                            </label>
+                            
+                            <!-- Fotos existentes -->
+                            {% if reporte.fotos %}
+                                <div class="existing-photos">
+                                    <h4>Fotos actuales:</h4>
+                                    <div class="photo-preview">
+                                        {% for foto in reporte.fotos %}
+                                            <div class="existing-photo-item">
+                                                <img src="{{ url_for('static', filename='uploads/' + foto) }}" alt="Foto del reporte">
+                                                <button type="button" class="photo-remove" onclick="removeExistingPhoto(this, '{{ foto }}')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Subir nuevas fotos -->
+                            <div class="photo-upload-section" id="photoUploadArea">
+                                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h4>Agregá nuevas fotos</h4>
+                                    <p>Arrastrá las fotos aquí o hacé clic para seleccionar</p>
+                                    <p>Podés subir hasta 5 fotos en total (JPG, PNG, máximo 5MB cada una)</p>
+                                    <div class="photo-counter" id="photoCounter">0/5 fotos nuevas seleccionadas</div>
+                                </div>
+                                <!-- Botones específicos para móviles -->
+                                <div class="mobile-photo-actions">
+                                    <button type="button" class="photo-action-btn" onclick="openCamera()">
+                                        <i class="fas fa-camera"></i>
+                                        Tomar Foto
+                                    </button>
+                                    <button type="button" class="photo-action-btn secondary" onclick="document.getElementById('fileInput').click()">
+                                        <i class="fas fa-folder-open"></i>
+                                        Elegir de Galería
+                                    </button>
+                                </div>
+                                <input 
+                                    type="file" 
+                                    id="fileInput" 
+                                    name="fotos" 
+                                    multiple 
+                                    accept="image/*"
+                                    capture="environment"
+                                    style="display: none;"
+                                >
+                                <div class="photo-preview" id="photoPreview"></div>
+                            </div>
+                            <div class="input-help">
+                                <span class="help-text">Las fotos ayudan a entender mejor el problema</span>
+                            </div>
+                        </div>
+
+                        <!-- Urgencia -->
+                        <div class="form-group full-width">
+                            <label class="form-label">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Nivel de Urgencia
+                            </label>
+                            <div class="urgency-options">
+                                <label class="urgency-option low">
+                                    <input type="radio" name="urgencia" value="baja" {{ 'checked' if reporte.urgencia == 'baja' else '' }}>
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Baja</span>
+                                            <small>Problema que puede esperar</small>
+                                        </div>
+                                    </span>
+                                </label>
+                                <label class="urgency-option medium">
+                                    <input type="radio" name="urgencia" value="media" {{ 'checked' if reporte.urgencia == 'media' else '' }}>
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Media</span>
+                                            <small>Requiere atención pronta</small>
+                                        </div>
+                                    </span>
+                                </label>
+                                <label class="urgency-option high">
+                                    <input type="radio" name="urgencia" value="alta" {{ 'checked' if reporte.urgencia == 'alta' else '' }}>
+                                    <span class="option-content">
+                                        <i class="fas fa-circle"></i>
+                                        <div>
+                                            <span class="option-text">Alta - EMERGENCIA</span>
+                                            <small>Va directo a Defensa Civil</small>
+                                        </div>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Contacto -->
+                        <div class="form-group">
+                            <label for="contacto" class="form-label">
+                                <i class="fas fa-phone"></i>
+                                Teléfono de Contacto <span id="contactoRequired" style="display: none; color: #e74c3c;">*</span>
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="contacto" 
+                                name="contacto" 
+                                class="form-input" 
+                                placeholder="Ej: (381) 123-4567"
+                                value="{{ reporte.contacto if reporte.contacto else '' }}"
+                            >
+                            <div class="input-help">
+                                <span class="help-text">Para seguimiento del reporte</span>
+                            </div>
+                            <div class="contact-required" id="contactAlert">
+                                <i class="fas fa-info-circle"></i>
+                                <strong>Teléfono obligatorio para reportes de emergencia</strong>
+                            </div>
+                        </div>
+
+                        <!-- Fecha de Creación (Solo lectura) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-calendar-alt"></i>
+                                Fecha de Creación
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-input readonly" 
+                                value="{{ reporte.fecha }}"
+                                readonly
+                            >
+                        </div>
+
+                        <!-- ID del Reporte (Solo lectura) -->
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fas fa-hashtag"></i>
+                                ID del Reporte
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-input readonly" 
+                                value="#{{ reporte.id }}"
+                                readonly
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Campos ocultos para fotos a eliminar -->
+                    <input type="hidden" id="fotosEliminar" name="fotos_eliminar" value="">
+
+                    <!-- Form Actions -->
+                    <div class="form-actions">
+                        <a href="{{ url_for('ver_reportes') }}" class="btn btn-secondary" id="cancelBtn">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-success" id="saveBtn">
+                            <i class="fas fa-save"></i>
+                            <span id="saveText">Guardar Cambios</span>
+                        </button>
+                    </div>
+
+                    <!-- Form Info -->
+                    <div class="form-info">
+                        <div class="info-item">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Podés cambiar título, ubicación, descripción, fotos y urgencia</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-clock"></i>
+                            <span>Los cambios se reflejan inmediatamente</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Tu información sigue protegida</span>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i>
+                            <span><strong>Emergencias van directo a Defensa Civil</strong></span>
+                        </div>
+                    </div>
+                </form>
+
+                <!-- Edit History Sidebar -->
+                <div class="history-sidebar">
+                    <h3><i class="fas fa-history"></i> Historial de Cambios</h3>
+                    <div class="history-item">
+                        <div class="history-date">{{ reporte.fecha }}</div>
+                        <div class="history-action">
+                            <i class="fas fa-plus-circle"></i>
+                            Reporte creado
+                        </div>
+                    </div>
+                    <div class="history-item">
+                        <div class="history-date">Ahora</div>
+                        <div class="history-action">
+                            <i class="fas fa-edit"></i>
+                            Editando reporte
+                        </div>
+                    </div>
+                    
+                    <div class="edit-tips">
+                        <h4><i class="fas fa-lightbulb"></i> Consejos</h4>
+                        <div class="tip">
+                            <i class="fas fa-check"></i>
+                            <span>Mantené la información actualizada</span>
+                        </div>
+                        <div class="tip">
+                            <i class="fas fa-check"></i>
+                            <span>Agregá nuevos detalles si aparecen</span>
+                        </div>
+                        <div class="tip">
+                            <i class="fas fa-camera"></i>
+                            <span>Actualizá las fotos si es necesario</span>
+                        </div>
+                        <div class="tip">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Usá "Alta" solo para emergencias reales</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+<!-- Agregá este bloque <style> justo después de la línea del CSS existente en tu HTML -->
+
+<style>
+/* CSS para History Sidebar - Inline */
+.form-container {
+    display: grid !important;
+    grid-template-columns: 2fr 1fr !important;
+    gap: 2rem !important;
+    max-width: 1400px !important;
+    margin: 0 auto !important;
+}
+
+.report-form {
+    width: 100% !important;
+    max-width: none !important;
+}
+
+.history-sidebar {
+    background: #ffffff !important;
+    border: 1px solid #e1e8ed !important;
+    border-radius: 12px !important;
+    padding: 1.5rem !important;
+    height: fit-content !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    min-width: 280px !important;
+}
+
+.history-sidebar h3 {
+    color: #2c3e50 !important;
+    font-size: 1.1rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 1.5rem 0 !important;
+    padding-bottom: 0.75rem !important;
+    border-bottom: 2px solid #f8f9fa !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.history-sidebar h3 i {
+    color: #3498db !important;
+}
+
+.history-item {
+    padding: 1rem 0 !important;
+    border-bottom: 1px solid #f1f3f4 !important;
+}
+
+.history-item:last-child {
+    border-bottom: none !important;
+}
+
+.history-date {
+    font-size: 0.85rem !important;
+    color: #7f8c8d !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.history-action {
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+    color: #2c3e50 !important;
+    font-size: 0.9rem !important;
+}
+
+.history-action i {
+    color: #27ae60 !important;
+    font-size: 0.85rem !important;
+}
+
+.edit-tips {
+    margin-top: 2rem !important;
+    padding-top: 1.5rem !important;
+    border-top: 2px solid #f8f9fa !important;
+}
+
+.edit-tips h4 {
+    color: #2c3e50 !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    margin: 0 0 1rem 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0.5rem !important;
+}
+
+.edit-tips h4 i {
+    color: #f39c12 !important;
+}
+
+.tip {
+    display: flex !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-bottom: 0.75rem !important;
+    padding: 0.5rem !important;
+    background: #f8f9fa !important;
+    border-radius: 6px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.tip:hover {
+    background: #ecf0f1 !important;
+}
+
+.tip i {
+    color: #27ae60 !important;
+    font-size: 0.8rem !important;
+    margin-top: 0.1rem !important;
+    flex-shrink: 0 !important;
+}
+
+.tip span {
+    font-size: 0.85rem !important;
+    color: #2c3e50 !important;
+    line-height: 1.4 !important;
+}
+
+@media (max-width: 900px) {
+    .form-container {
+        grid-template-columns: 1fr !important;
+        gap: 1.5rem !important;
+    }
+    
+    .history-sidebar {
+        order: -1 !important;
+        position: static !important;
+        margin-bottom: 1rem !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .form-container {
+        padding: 0 1rem !important;
+    }
+    
+    .history-sidebar {
+        padding: 1rem !important;
+        margin: 0 0 1rem 0 !important;
+        border-radius: 8px !important;
+        min-width: auto !important;
+    }
+}
+</style>
+
+
+
+
+
+
+
+
+    
+    <script>
+        // Variables globales
+        let uploadedFiles = [];
+        let fotosAEliminar = [];
+
+        // Función para abrir cámara (específico para móviles)
+        function openCamera() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment'; // Cámara trasera por defecto
+            input.onchange = function(e) {
+                const files = Array.from(this.files);
+                handleFiles(files);
+            };
+            input.click();
+        }
+
+        // Character counters
+        function setupCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            
+            input.addEventListener('input', function() {
+                const currentLength = this.value.length;
+                counter.textContent = `${currentLength}/${maxLength}`;
+                counter.style.color = currentLength > maxLength * 0.9 ? '#e74c3c' : '#7f8c8d';
+            });
+        }
+
+        setupCharCounter('titulo', 'tituloCounter', 100);
+        setupCharCounter('descripcion', 'descripcionCounter', 500);
+
+        // Manejo de urgencia y alerta de emergencia
+        const urgencyRadios = document.querySelectorAll('input[name="urgencia"]');
+        const emergencyAlert = document.getElementById('emergencyAlert');
+        const contactAlert = document.getElementById('contactAlert');
+        const contactRequired = document.getElementById('contactoRequired');
+        const contactInput = document.getElementById('contacto');
+
+        // Verificar urgencia inicial
+        function checkUrgencyOnLoad() {
+            const checkedUrgency = document.querySelector('input[name="urgencia"]:checked');
+            if (checkedUrgency && checkedUrgency.value === 'alta') {
+                emergencyAlert.classList.add('show');
+                contactAlert.classList.add('show');
+                contactRequired.style.display = 'inline';
+                contactInput.required = true;
+            }
+        }
+
+        urgencyRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'alta') {
+                    emergencyAlert.classList.add('show');
+                    contactAlert.classList.add('show');
+                    contactRequired.style.display = 'inline';
+                    contactInput.required = true;
+                } else {
+                    emergencyAlert.classList.remove('show');
+                    contactAlert.classList.remove('show');
+                    contactRequired.style.display = 'none';
+                    contactInput.required = false;
+                }
+            });
+        });
+
+        // Verificar urgencia al cargar la página
+        checkUrgencyOnLoad();
+
+        // Manejo de archivos de foto
+        const fileInput = document.getElementById('fileInput');
+        const photoUploadArea = document.getElementById('photoUploadArea');
+        const photoPreview = document.getElementById('photoPreview');
+        const photoCounter = document.getElementById('photoCounter');
+
+        // Drag and drop
+        photoUploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            this.classList.add('dragover');
+        });
+
+        photoUploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+        });
+
+        photoUploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            this.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files);
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', function(e) {
+            const files = Array.from(this.files);
+            handleFiles(files);
+        });
+
+        function handleFiles(files) {
+            const imageFiles = files.filter(file => file.type.startsWith('image/'));
+            const existingPhotos = document.querySelectorAll('.existing-photo-item').length;
+            const totalPhotos = existingPhotos + uploadedFiles.length + imageFiles.length;
+            
+            if (totalPhotos > 5) {
+                alert('Podés tener máximo 5 fotos en total');
+                return;
+            }
+
+            imageFiles.forEach(file => {
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`La foto ${file.name} es muy grande (máximo 5MB)`);
+                    return;
+                }
+
+                uploadedFiles.push(file);
+                displayPhoto(file);
+            });
+
+            updatePhotoCounter();
+            updateFileInput();
+        }
+
+        function displayPhoto(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const photoItem = document.createElement('div');
+                photoItem.classList.add('photo-item');
+                photoItem.innerHTML = `
+                    <img src="${e.target.result}" alt="Preview">
+                    <button type="button" class="photo-remove" onclick="removePhoto(this, '${file.name}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                photoPreview.appendChild(photoItem);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removePhoto(button, fileName) {
+            uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+            button.parentElement.remove();
+            updatePhotoCounter();
+            updateFileInput();
+        }
+
+        function removeExistingPhoto(button, fileName) {
+            if (confirm('¿Estás seguro de que querés eliminar esta foto?')) {
+                fotosAEliminar.push(fileName);
+                document.getElementById('fotosEliminar').value = fotosAEliminar.join(',');
+                button.parentElement.remove();
+                updatePhotoCounter();
+            }
+        }
+
+        function updatePhotoCounter() {
+            const existingPhotos = document.querySelectorAll('.existing-photo-item').length;
+            const totalPhotos = existingPhotos + uploadedFiles.length;
+            photoCounter.textContent = `${uploadedFiles.length}/5 fotos nuevas seleccionadas (${totalPhotos} fotos en total)`;
+        }
+
+        function updateFileInput() {
+            // Crear un nuevo DataTransfer para actualizar el input
+            const dataTransfer = new DataTransfer();
+            uploadedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+            fileInput.files = dataTransfer.files;
+        }
+
+                // Get location functionality
+        document.getElementById('getLocationBtn').addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo ubicación...';
+    btn.disabled = true;
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+                const lat = position.coords.latitude.toFixed(6);
+                const lon = position.coords.longitude.toFixed(6);
+                
+                document.getElementById('ubicacion').value = `Lat: ${lat}, Lng: ${lon}`;
+                
+                btn.innerHTML = '<i class="fas fa-check"></i> Ubicación obtenida';
+                btn.style.background = '#27ae60';
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            },
+            function(error) {
+                console.error('Error getting location:', error);
+                btn.innerHTML = '<i class="fas fa-times"></i> Error al obtener ubicación';
+                btn.style.background = '#e74c3c';
+                btn.disabled = false;
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                }, 2000);
+            }
+        );
+    } else {
+        alert('La geolocalización no está soportada en este navegador.');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+});
+    </script>

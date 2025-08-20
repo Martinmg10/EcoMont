@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Informe de Intervención</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            color: #333;
+        }
+        h1 {
+            color: #2e7d32;
+            text-align: center;
+        }
+        .info {
+            margin-bottom: 20px;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            margin-left: 10px;
+        }
+        hr {
+            margin: 20px 0;
+            border: 0;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Informe de Intervención - EcoMont</h1>
+    <div class="info">
+        <span class="label">ID del Reporte:</span><span class="value">{{ informe.id }}</span>
+    </div>
+    <div class="info">
+        <span class="label">Título:</span><span class="value">{{ informe.titulo }}</span>
+    </div>
+    <div class="info">
+        <span class="label">Ubicación:</span><span class="value">{{ informe.ubicacion }}</span>
+    </div>
+    <div class="info">
+        <span class="label">Fecha y Hora:</span><span class="value">{{ informe.fecha_hora }}</span>
+    </div>
+    <div class="info">
+        <span class="label">Descripción:</span><p>{{ informe.descripcion }}</p>
+    </div>
+    <div class="info">
+        <span class="label">Estado:</span><span class="value">Resuelto por Defensa Civil</span>
+    </div>
+    <hr>
+    <p>Este documento certifica que la alerta ha sido atendida y resuelta por Defensa Civil en EcoMont.</p>
+</body>
+</html>

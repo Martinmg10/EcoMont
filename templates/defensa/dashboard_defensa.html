@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Defensa Civil</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #c53030 0%, #e53e3e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(197, 48, 48, 0.1);
+        }
+
+        .header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Profile Dropdown */
+        .profile-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .profile-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .profile-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #fff, #fed7d7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #c53030;
+            font-weight: bold;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: white;
+            min-width: 220px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            z-index: 1000;
+            margin-top: 0.5rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dropdown-content.show {
+            display: block;
+            animation: dropdownFade 0.3s ease-out;
+        }
+
+        @keyframes dropdownFade {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dropdown-header {
+            padding: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: center;
+        }
+
+        .dropdown-header h4 {
+            color: #c53030;
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .dropdown-header p {
+            color: #666;
+            margin: 0.25rem 0 0 0;
+            font-size: 0.85rem;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #333;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .dropdown-item i {
+            width: 18px;
+            color: #c53030;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 0.5rem 0;
+        }
+
+        .dropdown-item.logout {
+            color: #dc3545;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .dropdown-item.logout i {
+            color: #dc3545;
+        }
+
+        .dropdown-item.logout:hover {
+            background-color: #fff5f5;
+        }
+
+        /* Quick Actions in Header */
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-actions {
+                gap: 0.25rem;
+            }
+            
+            .profile-btn span {
+                display: none;
+            }
+            
+            .dropdown-content {
+                min-width: 200px;
+            }
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .hero-title {
+            font-size: 2.5rem;
+            color: #c53030;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Weather Section */
+        .weather-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .weather-icon img {
+            width: 80px;
+            height: 80px;
+        }
+
+        .weather-info h3 {
+            color: #c53030;
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .weather-info p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Stats Section */
+        .hero-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-item i {
+            font-size: 2.5rem;
+            color: #e53e3e;
+            margin-bottom: 1rem;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #c53030;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        /* Alert Messages */
+        .alert-messages {
+            margin: 2rem 0;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .alert.success {
+            background: #f0fff4;
+            color: #22543d;
+            border-left: 4px solid #38a169;
+        }
+
+        .alert.error {
+            background: #fed7d7;
+            color: #742a2a;
+            border-left: 4px solid #e53e3e;
+        }
+
+        /* Cards Section */
+        .cards-section {
+            padding: 2rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #c53030;
+            margin-bottom: 3rem;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .action-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .action-card.primary {
+            border-top: 4px solid #e53e3e;
+        }
+
+        .action-card.secondary {
+            border-top: 4px solid #fd7f28;
+        }
+
+        .action-card.urgent {
+            border-top: 4px solid #ff1744;
+            background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        }
+
+        .action-card.map {
+            border-top: 4px solid #ff6347;
+        }
+
+        .card-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .action-card.primary .card-icon {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .action-card.secondary .card-icon {
+            background: linear-gradient(135deg, #fd7f28, #ea580c);
+            color: white;
+        }
+
+        .action-card.urgent .card-icon {
+            background: linear-gradient(135deg, #ff1744, #d32f2f);
+            color: white;
+        }
+
+        .action-card.map .card-icon {
+            background: linear-gradient(135deg, #ff6347, #e53e3e);
+            color: white;
+        }
+
+        .card-content h3 {
+            font-size: 1.4rem;
+            color: #c53030;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .card-action {
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #c53030, #a02626);
+            transform: scale(1.05);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #fd7f28, #ea580c);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #ea580c, #c2410c);
+            transform: scale(1.05);
+        }
+
+        .btn-urgent {
+            background: linear-gradient(135deg, #ff1744, #d32f2f);
+            color: white;
+        }
+
+        .btn-urgent:hover {
+            background: linear-gradient(135deg, #d32f2f, #b71c1c);
+            transform: scale(1.05);
+        }
+
+        .btn-map {
+            background: linear-gradient(135deg, #ff6347, #e53e3e);
+            color: white;
+        }
+
+        .btn-map:hover {
+            background: linear-gradient(135deg, #e53e3e, #c53030);
+            transform: scale(1.05);
+        }
+
+        .badge {
+            display: inline-block;
+            background: #c53030;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 0.3rem 0.6rem;
+            border-radius: 12px;
+            margin-left: 0.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #c53030;
+            color: white;
+            padding: 3rem 0 1rem;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .footer-logo {
+            width: 24px;
+            height: 24px;
+        }
+
+        .footer-section p, .footer-section a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .weather-section {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header con navegación -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+                <span>  ¡Bienvenido a EcoMont !</span>
+            </div>
+            <div class="header-actions">
+                <a href="{{ url_for('dashboard_defensa') }}" class="nav-link">
+                    <i class="fas fa-home"></i> Inicio
+                </a>
+                
+                <!-- Botón de Ayuda -->
+                <button class="quick-action-btn" onclick="toggleHelp()" title="Ayuda">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+                
+                <!-- Botón de Configuración -->
+                <button class="quick-action-btn" onclick="openSettings()" title="Configuración">
+                    <i class="fas fa-cog"></i>
+                </button>
+                
+                <!-- Dropdown de Perfil -->
+                <div class="profile-dropdown">
+                    <button class="profile-btn" onclick="toggleProfile()">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span>Personal DC</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div id="profileDropdown" class="dropdown-content">
+                        <div class="dropdown-header">
+                            <h4>Personal Defensa Civil</h4>
+                            <p>Operador en servicio</p>
+                        </div>
+                        <a href="#" onclick="viewProfile()" class="dropdown-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span>Ver Perfil</span>
+                        </a>
+                        <a href="#" onclick="editProfile()" class="dropdown-item">
+                            <i class="fas fa-edit"></i>
+                            <span>Editar Perfil</span>
+                        </a>
+                        <a href="#" onclick="viewSchedule()" class="dropdown-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Mi Turno</span>
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a href="#" onclick="logout()" class="dropdown-item logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Cerrar Sesión</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <i class="fas fa-shield-alt"></i>
+                    Panel de Defensa Civil
+                </h1>
+                <p class="hero-subtitle">
+                    Centro de comando para gestionar emergencias y alertas críticas. 
+                    Monitoreo en tiempo real y respuesta rápida ante situaciones de riesgo.
+                </p>
+
+                <!-- Mensajes de alerta -->
+                <div class="alert-messages">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert {{ category }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                <!-- Información del clima -->
+                {% if clima %}
+                <div class="weather-section">
+                    <div class="weather-icon">
+                        <img src="https://openweathermap.org/img/wn/{{ clima.icono }}@2x.png" alt="icono clima">
+                    </div>
+                    <div class="weather-info">
+                        <h3>{{ clima.ciudad }}</h3>
+                        <p>{{ clima.descripcion }} - {{ clima.temp }}°C</p>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Estadísticas -->
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="stat-number">{{ total_urgentes }}</span>
+                        <span class="stat-label">Alertas Urgentes</span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="stat-number">{{ total_resueltas }}</span>
+                        <span class="stat-label">Resueltas por Defensa Civil</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cards Section -->
+    <section class="cards-section">
+        <div class="container">
+            <h2 class="section-title">Seleccioná una acción para continuar</h2>
+            <div class="cards-grid">
+                <!-- Alertas Urgentes Card -->
+                <div class="action-card urgent">
+                    <div class="card-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>
+                            Alertas Urgentes
+                            {% if total_urgentes > 0 %}
+                                <span class="badge">{{ total_urgentes }}</span>
+                            {% endif %}
+                        </h3>
+                        <p>Revisá y actuá sobre emergencias en curso. Respuesta inmediata requerida para situaciones críticas.</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('alertas_urgentes') }}" class="btn btn-urgent">
+                            <i class="fas fa-bolt"></i> Ver Alertas
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Nuevo Informe Card -->
+                <div class="action-card primary">
+                    <div class="card-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Nuevo Informe</h3>
+                        <p>Cargá un informe de intervención o emergencia. Documentá acciones realizadas y recursos utilizados.</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('nuevo_informe_defensa') }}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Crear Informe
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Historial Card -->
+                <div class="action-card secondary">
+                    <div class="card-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Historial</h3>
+                        <p>Acciones de emergencia realizadas. Consultá el registro completo de intervenciones y seguimientos.</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('historial_defensa') }}" class="btn btn-secondary">
+                            <i class="fas fa-search"></i> Ver Historial
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Mapa Card -->
+                <div class="action-card map">
+                    <div class="card-icon">
+                        <i class="fas fa-map-marked-alt"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3>Mapa en Tiempo Real</h3>
+                        <p>Visualizá zonas de emergencia geolocalizadas. Monitoreo geográfico de alertas y recursos desplegados.</p>
+                    </div>
+                    <div class="card-action">
+                        <a href="{{ url_for('mapa_alertas_defensa') }}" class="btn btn-map">
+                            <i class="fas fa-map"></i> Ver Mapa
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>
+                        <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="footer-logo">
+                        EcoMont - Defensa Civil
+                    </h4>
+                    <p>Protegiendo a nuestra comunidad ante emergencias ambientales y riesgos naturales.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Emergencias</h4>
+                    <p><i class="fas fa-phone"></i> Línea de Emergencia: 911</p>
+                    <p><i class="fas fa-envelope"></i> defensa@ecoreportes.com</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#">Protocolos de Emergencia</a>
+                    <a href="#">Manual de Procedimientos</a>
+                    <a href="#">Contacto Central</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 EcoMont - Defensa Civil. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Funciones del dropdown de perfil
+        function toggleProfile() {
+            const dropdown = document.getElementById('profileDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Cerrar dropdown al hacer clic fuera
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-btn') && !event.target.closest('.profile-btn')) {
+                const dropdown = document.getElementById('profileDropdown');
+                if (dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        }
+
+        // Funciones de perfil
+        function viewProfile() {
+            alert('Redirigiendo a ver perfil...');
+           window.location.href = "{{ url_for('login_defensa') }}";
+
+        }
+
+        function editProfile() {
+            alert('Redirigiendo a editar perfil...');
+            window.location.href = "{{ url_for('login_defensa') }}";
+
+        }
+
+        function viewSchedule() {
+            alert('Redirigiendo a ver turno...');
+            window.location.href = "{{ url_for('login_defensa') }}";
+
+        }
+
+        function openSettings() {
+            alert('Abriendo configuración...');
+            window.location.href = "{{ url_for('dashboard_defensa') }}";
+
+        }
+
+        function toggleHelp() {
+            alert('Sistema de Ayuda\n\n• Alertas Urgentes: Gestiona emergencias críticas\n• Nuevo Informe: Documenta intervenciones\n• Historial: Revisa acciones pasadas\n• Mapa: Visualiza zonas de riesgo\n\nPara más ayuda, contacta al supervisor.');
+        }
+
+        function logout() {
+            if (confirm('¿Estás seguro que deseas cerrar sesión?')) {
+                alert('Cerrando sesión...');
+                window.location.href = "{{ url_for('login_defensa') }}";
+
+            }
+        }
+
+        // Animaciones suaves al cargar
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.action-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        });
+    </script>
+</body>
+</html>

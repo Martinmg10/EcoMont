@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emitir Mensaje - Municipalidad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .back-btn {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 128, 255, 0.3);
+        }
+
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #0080ff;
+            box-shadow: 0 0 0 3px rgba(0, 128, 255, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0080ff 0%, #0066cc 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 128, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+            border: 1px solid #ddd;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .char-counter {
+            text-align: right;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px 10px;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📧 Emitir Mensaje</h1>
+        <p>Envía mensajes directos a los ciudadanos</p>
+    </div>
+
+    <div class="container">
+        <button class="back-btn" onclick="goBack()">
+            <span>←</span>
+            Volver al Menu Principal
+        </button>
+
+        <div class="form-container">
+            <h2 class="form-title">
+                <span>📧</span>
+                Enviar Mensaje a Ciudadano
+            </h2>
+
+            <div class="success-message" id="successMessage">
+                <span>✓</span>
+                <span>Mensaje enviado exitosamente</span>
+            </div>
+            
+            <form id="messageForm" onsubmit="sendMessage(event)">
+                <div class="form-group">
+                    <label for="recipientEmail" class="form-label">Email del Ciudadano *</label>
+                    <input 
+                        type="email" 
+                        id="recipientEmail" 
+                        class="form-input" 
+                        placeholder="ejemplo@email.com"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="messageSubject" class="form-label">Asunto *</label>
+                    <input 
+                        type="text" 
+                        id="messageSubject" 
+                        class="form-input" 
+                        placeholder="Asunto del mensaje"
+                        required
+                        maxlength="100"
+                        oninput="updateCharCounter('messageSubject', 'subjectCounter', 100)"
+                    >
+                    <div class="char-counter" id="subjectCounter">0/100 caracteres</div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="messageContent" class="form-label">Mensaje *</label>
+                    <textarea 
+                        id="messageContent" 
+                        class="form-input form-textarea" 
+                        placeholder="Escriba aquí el mensaje que desea enviar al ciudadano..."
+                        required
+                        maxlength="500"
+                        oninput="updateCharCounter('messageContent', 'messageCounter', 500)"
+                    ></textarea>
+                    <div class="char-counter" id="messageCounter">0/500 caracteres</div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="clearForm()">
+                        <span>🗑️</span>
+                        Limpiar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="sendBtn">
+                        <span>📧</span>
+                        Enviar Mensaje
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Funciones principales
+        function sendMessage(event) {
+            event.preventDefault();
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const successMessage = document.getElementById('successMessage');
+            const form = document.getElementById('messageForm');
+            
+            // Obtener los valores del formulario
+            const email = document.getElementById('recipientEmail').value;
+            const subject = document.getElementById('messageSubject').value;
+            const message = document.getElementById('messageContent').value;
+            
+            // Simular envío (cambiar texto del botón)
+            sendBtn.innerHTML = '<span>⏳</span> Enviando...';
+            sendBtn.disabled = true;
+            
+            // Simular delay de envío
+            setTimeout(() => {
+                // Mostrar mensaje de éxito
+                successMessage.classList.add('show');
+                
+                // Limpiar formulario
+                form.reset();
+                resetCharCounters();
+                
+                // Restaurar botón
+                sendBtn.innerHTML = '<span>📧</span> Enviar Mensaje';
+                sendBtn.disabled = false;
+                
+                // Ocultar mensaje de éxito después de 3 segundos
+                setTimeout(() => {
+                    successMessage.classList.remove('show');
+                }, 3000);
+                
+                console.log('Mensaje enviado:', {
+                    to: email,
+                    subject: subject,
+                    message: message,
+                    timestamp: new Date().toISOString()
+                });
+                
+            }, 1500);
+        }
+
+        function clearForm() {
+            if (confirm('¿Estás seguro de que quieres limpiar el formulario?')) {
+                document.getElementById('messageForm').reset();
+                resetCharCounters();
+                document.getElementById('recipientEmail').focus();
+            }
+        }
+
+        function goBack() {
+            // Verificar si hay contenido sin guardar
+            const email = document.getElementById('recipientEmail').value;
+            const subject = document.getElementById('messageSubject').value;
+            const message = document.getElementById('messageContent').value;
+            
+            if (email || subject || message) {
+                if (confirm('Tienes cambios sin guardar. ¿Estás seguro de que quieres salir?')) {
+                    window.location.href = '/dashboard_municipalidad';
+                }
+            } else {
+                window.location.href = '/dashboard_municipalidad';
+            }
+        }
+
+        function updateCharCounter(inputId, counterId, maxLength) {
+            const input = document.getElementById(inputId);
+            const counter = document.getElementById(counterId);
+            const currentLength = input.value.length;
+            
+            counter.textContent = `${currentLength}/${maxLength} caracteres`;
+            
+            // Cambiar color si se acerca al límite
+            if (currentLength > maxLength * 0.9) {
+                counter.style.color = '#f57c00';
+            } else if (currentLength === maxLength) {
+                counter.style.color = '#d32f2f';
+            } else {
+                counter.style.color = '#666';
+            }
+        }
+
+        function resetCharCounters() {
+            document.getElementById('subjectCounter').textContent = '0/100 caracteres';
+            document.getElementById('messageCounter').textContent = '0/500 caracteres';
+            document.getElementById('subjectCounter').style.color = '#666';
+            document.getElementById('messageCounter').style.color = '#666';
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Enfocar el primer campo al cargar
+            document.getElementById('recipientEmail').focus();
+            
+            // Atajos de teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    goBack();
+                } else if (e.ctrlKey && e.key === 'Enter') {
+                    // Ctrl + Enter para enviar rápido
+                    document.getElementById('messageForm').dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+
+        // Validación en tiempo real
+        document.getElementById('recipientEmail').addEventListener('input', function() {
+            const email = this.value;
+            const isValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            
+            if (email && !isValid) {
+                this.style.borderColor = '#d32f2f';
+            } else {
+                this.style.borderColor = email ? '#0080ff' : '#e0e0e0';
+            }
+        });
+
+        // Prevenir pérdida de datos accidental
+        window.addEventListener('beforeunload', function(e) {
+            const email = document.getElementById('recipientEmail').value;
+            const subject = document.getElementById('messageSubject').value;
+            const message = document.getElementById('messageContent').value;
+            
+            if (email || subject || message) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        });
+    </script>
+</body>
+</html>

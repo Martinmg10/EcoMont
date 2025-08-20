@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Reportes - EcoMont</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="nav-brand">
+                 <img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="logo">
+              
+            </div>
+            <nav class="nav-menu">
+                <a href="{{ url_for('dashboard_ciudadano') }}" class="nav-link">
+                    <i class="fas fa-arrow-left"></i> Volver
+                </a>
+                <a href="{{ url_for('nuevo_reporte') }}" class="nav-link btn-create">
+                    <i class="fas fa-plus"></i> Nuevo Reporte
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Reports Section -->
+    <section class="reports-section">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="reports-header">
+                <h1 class="reports-title">
+                    <i class="fas fa-list-alt"></i>
+                    Mis Reportes
+                </h1>
+                <div class="reports-stats">
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ reportes|length }}</span>
+                        <span class="stat-label">Total de Reportes</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ reportes|selectattr('estado', 'equalto', 'Pendiente')|list|length }}</span>
+                        <span class="stat-label">Pendientes</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-number">{{ reportes|selectattr('estado', 'in', ['Resuelto', 'Resuelto por Defensa Civil'])|list|length }}</span>
+                        <span class="stat-label">Resueltos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="statusFilter" class="filter-label">
+                        <i class="fas fa-filter"></i> Filtrar por Estado:
+                    </label>
+                    <select id="statusFilter" class="filter-select">
+                        <option value="">Todos los estados</option>
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="Resuelto">Resuelto</option>
+                        <option value="Resuelto por Defensa Civil">Resuelto por Defensa Civil</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label for="searchInput" class="filter-label">
+                        <i class="fas fa-search"></i> Buscar:
+                    </label>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Buscar por título o ubicación...">
+                </div>
+            </div>
+
+            <!-- Reports Grid -->
+            {% if reportes %}
+                <div class="reports-grid" id="reportsGrid">
+                    {% for reporte in reportes %}
+                        <div class="report-card" data-status="{{ reporte.estado }}" data-search="{{ (reporte.titulo + ' ' + reporte.ubicacion)|lower }}">
+                            <div class="report-header">
+                                <div class="report-id">#{{ reporte.id }}</div>
+                                <div class="report-status">
+                                    <span class="status-badge status-{{ reporte.estado|lower|replace(' ', '-') }}">
+                                        {% if reporte.estado == 'Pendiente' %}
+                                            <i class="fas fa-clock"></i>
+                                        {% elif reporte.estado in ['Resuelto', 'Resuelto por Defensa Civil'] %}
+                                            <i class="fas fa-check-circle"></i>
+                                        {% else %}
+                                            <i class="fas fa-info-circle"></i>
+                                        {% endif %}
+                                        {{ reporte.estado }}
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="report-content">
+                                <h3 class="report-title">{{ reporte.titulo }}</h3>
+                                <div class="report-info">
+                                    <div class="info-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span>{{ reporte.ubicacion }}</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span>{{ reporte.fecha }}</span>
+                                    </div>
+                                    {% if reporte.tipo %}
+                                    <div class="info-item">
+                                        <i class="fas fa-tag"></i>
+                                        <span>{{ reporte.tipo }}</span>
+                                    </div>
+                                    {% endif %}
+                                    {% if reporte.urgencia %}
+                                    <div class="info-item">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>Urgencia: {{ reporte.urgencia }}</span>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <p class="report-description">{{ reporte.descripcion[:100] }}{% if reporte.descripcion|length > 100 %}...{% endif %}</p>
+                            </div>
+
+                            <div class="report-actions">
+                                <button class="btn-action btn-view" data-report-id="{{ reporte.id }}">
+                                    <i class="fas fa-eye"></i>
+                                    Ver Detalles
+                                </button>
+                                {% if reporte.estado == 'Pendiente' %}
+                                <a href="{{ url_for('editar_reporte', reporte_id=reporte.id) }}" class="btn-action btn-edit">
+                                    <i class="fas fa-edit"></i>
+                                    Editar
+                                </a>
+                                <button class="btn-action btn-delete" data-report-id="{{ reporte.id }}" data-report-title="{{ reporte.titulo|e }}">
+                                    <i class="fas fa-trash"></i>
+                                    Eliminar
+                                </button>
+                                {% else %}
+                                <span class="btn-action btn-disabled">
+                                    <i class="fas fa-lock"></i>
+                                    Finalizado
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3>No tienes reportes aún</h3>
+                    <p>¡Creá tu primer reporte y ayudá a mejorar tu comunidad!</p>
+                    <a href="{{ url_for('nuevo_reporte') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Crear Primer Reporte
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+    <!-- Modal para ver detalles -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Detalles del Reporte</h2>
+                <span class="modal-close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Contenido del modal se carga dinámicamente -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal()">Cerrar</button>
+                <button class="btn btn-primary" id="editFromModal" style="display: none;">
+                    <i class="fas fa-edit"></i> Editar Reporte
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmación para eliminar -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2>Confirmar Eliminación</h2>
+                <span class="modal-close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="delete-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <p>¿Estás seguro de que querés eliminar el reporte "<span id="deleteReportTitle"></span>"?</p>
+                    <p class="warning-text">Esta acción no se puede deshacer.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+               <form id="deleteForm" method="POST" class="form-inline">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Sí, Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                   <h4><img src="{{ url_for('static', filename='img/EcoMont.png') }}" alt="EcoMont Logo" class="footer-logo"> EcoMont</h4>
+                    <p>Trabajando juntos por un ambiente más limpio y sustentable.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contacto</h4>
+                    <p><i class="fas fa-envelope"></i> info@ecomont.com</p>
+                    <p><i class="fas fa-phone"></i> (381) 123-4567</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Enlaces</h4>
+                    <a href="#">Términos de Uso</a>
+                    <a href="#">Política de Privacidad</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; {{ current_year }} EcoMont - Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Event listeners para los botones usando delegación de eventos
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtrado por estado y búsqueda
+            const statusFilter = document.getElementById('statusFilter');
+            const searchInput = document.getElementById('searchInput');
+            
+            if (statusFilter) statusFilter.addEventListener('change', filterReports);
+            if (searchInput) searchInput.addEventListener('input', filterReports);
+
+            // Event listeners para botones de ver detalles
+            document.querySelectorAll('.btn-view').forEach(button => {
+                button.addEventListener('click', function() {
+                    const reportId = this.getAttribute('data-report-id');
+                    console.log('Viewing report:', reportId);
+                    viewReport(reportId);
+                });
+            });
+
+            // Event listeners para botones de eliminar
+            document.querySelectorAll('.btn-delete').forEach(button => {
+                button.addEventListener('click', function() {
+                    const reportId = this.getAttribute('data-report-id');
+                    const reportTitle = this.getAttribute('data-report-title');
+                    console.log('Delete report:', reportId, reportTitle);
+                    confirmDelete(reportId, reportTitle);
+                });
+            });
+        });
+
+        // Abrir modal con detalles del reporte
+        function viewReport(id) {
+            console.log('Fetching report details for ID:', id);
+            
+            // Mostrar indicador de carga
+            const modalBody = document.getElementById('modalBody');
+            modalBody.innerHTML = '<div class="loading">Cargando detalles...</div>';
+            document.getElementById('reportModal').style.display = 'block';
+            
+            fetch(`/api/reporte/${id}`)
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Report data received:', data);
+                    
+                    document.getElementById('modalTitle').textContent = `Reporte #${data.id} - ${data.titulo}`;
+
+                    // Determinar si es resuelto
+                    const isResolved = data.estado === 'Resuelto' || data.estado === 'Resuelto por Defensa Civil';
+                    
+                    modalBody.innerHTML = `
+                        <div class="modal-detail">
+                            <p><strong>Estado:</strong> 
+                                <span class="status-badge status-${data.estado.toLowerCase().replace(' ', '-')}">
+                                    ${isResolved ? '<i class="fas fa-check-circle"></i>' : '<i class="fas fa-clock"></i>'} ${data.estado}
+                                </span>
+                            </p>
+                            <p><strong>Ubicación:</strong> ${data.ubicacion}</p>
+                            <p><strong>Fecha:</strong> ${data.fecha}</p>
+                            ${data.tipo ? `<p><strong>Tipo:</strong> ${data.tipo}</p>` : ''}
+                            ${data.urgencia ? `<p><strong>Urgencia:</strong> ${data.urgencia}</p>` : ''}
+                            ${data.contacto ? `<p><strong>Contacto:</strong> ${data.contacto}</p>` : ''}
+                            <p><strong>Descripción:</strong></p>
+                            <div class="description-content">${data.descripcion}</div>
+                            ${data.imagen ? `<div class="image-container"><img src="${data.imagen}" alt="Imagen del reporte" class="report-image" style="max-width: 100%; height: auto; margin-top: 10px;"></div>` : ''}
+                        </div>
+                    `;
+
+                    // Mostrar botón de editar solo si está pendiente
+                    const editButton = document.getElementById('editFromModal');
+                    if (data.estado === 'Pendiente') {
+                        editButton.style.display = 'inline-block';
+                        editButton.onclick = () => {
+                            window.location.href = `/editar_reporte/${data.id}`;
+                        };
+                    } else {
+                        editButton.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching report:', error);
+                    modalBody.innerHTML = `
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>No se pudo cargar el reporte. Error: ${error.message}</p>
+                            <p>Por favor, intente nuevamente.</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Cerrar modal de detalles
+        function closeModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Abrir modal de confirmación de eliminación
+        function confirmDelete(reportId, reportTitle) {
+            document.getElementById('deleteReportTitle').textContent = reportTitle;
+            const deleteForm = document.getElementById('deleteForm');
+            deleteForm.action = `/eliminar_reporte/${reportId}`;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        // Cerrar modal de confirmación de eliminación
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        // Cerrar modales al hacer clic fuera del contenido
+        window.onclick = function(event) {
+            const reportModal = document.getElementById('reportModal');
+            const deleteModal = document.getElementById('deleteModal');
+            if (event.target === reportModal) {
+                closeModal();
+            }
+            if (event.target === deleteModal) {
+                closeDeleteModal();
+            }
+        }
+
+        // Filtrado por estado y búsqueda
+        function filterReports() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const reports = document.querySelectorAll('.report-card');
+
+            reports.forEach(report => {
+                const reportStatus = report.getAttribute('data-status');
+                const reportSearch = report.getAttribute('data-search');
+
+                // Normalizar estados para filtrado
+                let normalizedStatus = reportStatus;
+                if (reportStatus === 'Resuelto' || reportStatus === 'Resuelto por Defensa Civil') {
+                    normalizedStatus = 'Resuelto';
+                }
+
+                const matchesStatus = !statusFilter || 
+                    reportStatus === statusFilter || 
+                    (statusFilter === 'Resuelto' && (reportStatus === 'Resuelto' || reportStatus === 'Resuelto por Defensa Civil'));
+                
+                const matchesSearch = !searchTerm || reportSearch.includes(searchTerm);
+
+                if (matchesStatus && matchesSearch) {
+                    report.style.display = 'block';
+                } else {
+                    report.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
